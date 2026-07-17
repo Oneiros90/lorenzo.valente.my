@@ -1,0 +1,31 @@
+:root {
+  --violet: #8b5cf6;
+  --cyan: #38bdf8;
+  --panel-bg: rgba(10, 6, 26, 0.92);
+  --layout-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --layout-ms: 550ms;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #020008;
+  font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}

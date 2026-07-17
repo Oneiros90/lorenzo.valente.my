@@ -1,0 +1,51 @@
+.hud {
+  position: fixed;
+  color: #cfc6ff;
+  letter-spacing: 0.18em;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+  z-index: 5;
+  font-size: 12px;
+  text-transform: uppercase;
+  transition: opacity var(--layout-ms, 550ms) var(--layout-ease, ease);
+}
+
+.hud--hidden {
+  opacity: 0;
+}
+
+.hud--tl {
+  top: 22px;
+  left: 26px;
+}
+
+.hud--tl b {
+  display: block;
+  font-size: 19px;
+  letter-spacing: 0.32em;
+  color: #e9e4ff;
+}
+
+.hud--tr {
+  top: 22px;
+  right: 26px;
+  text-align: right;
+  color: #9be4ff;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+.hud--bl {
+  bottom: 20px;
+  left: 26px;
+  color: #8f86c9;
+}
+
+.hud--bl span {
+  color: #c4b5fd;
+}
+
+.hud--br {
+  bottom: 20px;
+  right: 26px;
+  color: #8f86c9;
+}

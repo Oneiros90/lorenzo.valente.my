@@ -1,0 +1,30 @@
+[
+  {
+    "id": "orbital-chess",
+    "url": "https://github.com/lorenzovalente/orbital-chess",
+    "stars": 128,
+    "lang": "TypeScript",
+    "tags": ["webgl", "chess", "ai"]
+  },
+  {
+    "id": "enceladus-ui",
+    "url": "https://github.com/lorenzovalente/enceladus-ui",
+    "stars": 342,
+    "lang": "Svelte",
+    "tags": ["ui", "design-system"]
+  },
+  {
+    "id": "plume-tracker",
+    "url": "https://github.com/lorenzovalente/plume-tracker",
+    "stars": 87,
+    "lang": "Python",
+    "tags": ["data", "realtime"]
+  },
+  {
+    "id": "shader-forge",
+    "url": "https://github.com/lorenzovalente/shader-forge",
+    "stars": 501,
+    "lang": "GLSL",
+    "tags": ["shaders", "tooling"]
+  }
+]

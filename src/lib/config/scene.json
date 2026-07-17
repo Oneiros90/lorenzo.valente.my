@@ -1,0 +1,12 @@
+{
+  "defaultLocale": "it",
+  "renderScale": 0.8,
+  "maxDpr": 1.25,
+  "bootDurationMs": 1900,
+  "fadeInSeconds": 2.0,
+  "fadeDelaySeconds": 1.2,
+  "clockIntervalMs": 500,
+  "cycleId": "2308.188",
+  "orbRadiusBase": 0.036,
+  "orbRadiusPerYear": 0.012
+}

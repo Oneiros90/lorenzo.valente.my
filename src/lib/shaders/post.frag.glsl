@@ -1,0 +1,63 @@
+#version 300 es
+precision highp float;
+out vec4 fragColor;
+uniform sampler2D uScene;
+uniform sampler2D uBloom;
+uniform vec2  iResolution;
+uniform float iTime;
+uniform float uFade;
+
+float hash21(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+vec2 hash22(vec2 p){ float n=hash21(p); return vec2(n,hash21(p+n)); }
+vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.,1.); }
+
+void main(){
+  vec2 uv = gl_FragCoord.xy/iResolution;
+  float t = iTime;
+
+  /* aberrazione cromatica radiale */
+  vec2 c = uv-0.5;
+  float ca = 0.0035*dot(c,c)*4.0;
+  vec3 col;
+  col.r = texture(uScene, uv+c*ca).r;
+  col.g = texture(uScene, uv).g;
+  col.b = texture(uScene, uv-c*ca).b;
+
+  /* bloom */
+  vec3 bloom = texture(uBloom, uv).rgb;
+  col += bloom*1.25;
+
+  /* pulviscolo fluttuante */
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    vec2 p = uv*vec2(iResolution.x/iResolution.y,1.0)*(4.0+fi*3.0);
+    p.y -= t*(0.015+fi*0.012);
+    p.x += sin(t*0.3+fi*2.0)*0.05;
+    vec2 id=floor(p), f=fract(p)-0.5;
+    vec2 o=hash22(id+fi*17.0)-0.5;
+    float d=length(f-o*0.8);
+    float vis=step(0.82,hash21(id+fi*31.0));
+    col += vec3(0.5,0.55,1.0)*smoothstep(0.025,0.0,d)*vis*(0.04+0.04*sin(t*1.5+hash21(id)*20.0));
+  }
+
+  /* tonemap ACES */
+  col = aces(col*1.30);
+
+  /* grade neutro con lieve tinta fredda nelle ombre */
+  col = pow(col, vec3(0.96,0.97,0.94));
+  col += vec3(0.008,0.010,0.020)*(1.0-col);
+
+  /* scanline + flicker */
+  col *= 0.97+0.03*sin(gl_FragCoord.y*1.7);
+  col *= 0.99+0.01*sin(t*60.0);
+
+  /* vignettatura */
+  float vig = 1.0-0.45*dot(c*1.25,c*1.25);
+  col *= clamp(vig,0.,1.);
+
+  /* grana */
+  col += (hash21(uv*vec2(1920.,1080.)+fract(t)*37.0)-0.5)*0.028;
+
+  col *= uFade;
+  fragColor = vec4(col,1.0);
+}

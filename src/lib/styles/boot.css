@@ -1,0 +1,42 @@
+.boot {
+  position: fixed;
+  inset: 0;
+  background: #020008;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #c4b5fd;
+  letter-spacing: 0.35em;
+  transition: opacity 1.4s ease;
+  font-size: 14px;
+}
+
+.boot.done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot__bar {
+  width: 260px;
+  height: 2px;
+  background: rgba(139, 92, 246, 0.2);
+  margin-top: 18px;
+  overflow: hidden;
+}
+
+.boot__bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  animation: boot-load 1.6s ease forwards;
+  box-shadow: 0 0 12px var(--violet);
+}
+
+@keyframes boot-load {
+  to {
+    width: 100%;
+  }
+}
