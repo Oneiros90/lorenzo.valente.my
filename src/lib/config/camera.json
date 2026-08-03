@@ -2,6 +2,20 @@
   "desktopBreakpoint": 768,
   "lerpSpeed": 0.07,
   "panelTransitionMs": 550,
+  "look": {
+    "smooth": 0.05,
+    "lookDistance": 2.4,
+    "desktop": {
+      "yawDeg": 150,
+      "pitchDeg": 62,
+      "pitchBiasDeg": -8
+    },
+    "mobile": {
+      "yawDeg": 125,
+      "pitchDeg": 62,
+      "pitchBiasDeg": -6
+    }
+  },
   "desk": {
     "ro": [0.0, 1.26, 2.1],
     "target": [0.0, 1.0, 0.5],

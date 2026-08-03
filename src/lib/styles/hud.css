@@ -34,16 +34,6 @@
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
 }
 
-.hud--bl {
-  bottom: 20px;
-  left: 26px;
-  color: #8f86c9;
-}
-
-.hud--bl span {
-  color: #c4b5fd;
-}
-
 .hud--br {
   bottom: 20px;
   right: 26px;

@@ -15,13 +15,9 @@ void main(){
   vec2 uv = gl_FragCoord.xy/iResolution;
   float t = iTime;
 
-  /* aberrazione cromatica radiale */
+  /* scena (CA a 1 sample — risparmio bandwidth post) */
   vec2 c = uv-0.5;
-  float ca = 0.0035*dot(c,c)*4.0;
-  vec3 col;
-  col.r = texture(uScene, uv+c*ca).r;
-  col.g = texture(uScene, uv).g;
-  col.b = texture(uScene, uv-c*ca).b;
+  vec3 col = texture(uScene, uv).rgb;
 
   /* bloom */
   vec3 bloom = texture(uBloom, uv).rgb;

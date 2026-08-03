@@ -19,6 +19,20 @@
     "orbs": "SFERE · AZIENDE",
     "atmosphere": "ATMOSFERA OK · O₂ 20.9% · GRAVITÀ ARTIF. 0.98g"
   },
+  "labels": {
+    "bio": "Biografia",
+    "chess": "chess.com",
+    "github": "GitHub",
+    "socials": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "telegram": "Telegram",
+      "discord": "Discord",
+      "youtube": "YouTube",
+      "mail": "Mail"
+    }
+  },
   "panels": {
     "close": "✕",
     "bio": {

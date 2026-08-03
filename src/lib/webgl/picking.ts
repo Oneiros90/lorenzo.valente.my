@@ -1,6 +1,7 @@
 import { lookBasis, type CameraPose } from './camera';
 import { orbPosJS, orbRadius } from './orbs';
-import type { CompanyConfig, PickId, SceneConfig, Vec3 } from './types';
+import { SOCIAL_ORB_RADIUS, SOCIAL_PICK_BASE, socialPosJS } from './socials';
+import type { CompanyConfig, PickId, SceneConfig, SocialConfig, Vec3 } from './types';
 
 export { orbPosJS, orbRadius };
 
@@ -142,7 +143,8 @@ export function pick(
   companies: CompanyConfig[],
   scene: SceneConfig,
   pose: CameraPose,
-  viewBias = 0
+  viewBias = 0,
+  socials: SocialConfig[] = []
 ): PickId {
   const { ro, rd } = cameraRay(clientX, clientY, canvas, pose, viewBias);
   let best = Infinity;
@@ -159,6 +161,9 @@ export function pick(
   for (let i = 0; i < companies.length; i++) {
     const r = orbRadius(companies[i].years, scene);
     test(hitSphere(ro, rd, orbPosJS(i, time, r), r), (4 + i) as PickId);
+  }
+  for (let i = 0; i < socials.length; i++) {
+    test(hitSphere(ro, rd, socialPosJS(i, time), SOCIAL_ORB_RADIUS), SOCIAL_PICK_BASE + i);
   }
   return id;
 }

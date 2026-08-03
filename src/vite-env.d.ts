@@ -41,6 +41,12 @@ declare module '$lib/config/camera.json' {
     desktopBreakpoint: number;
     lerpSpeed: number;
     panelTransitionMs: number;
+    look: {
+      smooth: number;
+      lookDistance: number;
+      desktop: { yawDeg: number; pitchDeg: number; pitchBiasDeg: number };
+      mobile: { yawDeg: number; pitchDeg: number; pitchBiasDeg: number };
+    };
     desk: { ro: [number, number, number]; target: [number, number, number]; focal: number };
     presets: Record<string, { ro: [number, number, number]; target: [number, number, number]; focal: number }>;
     orb: { offset: [number, number, number]; focal: number };

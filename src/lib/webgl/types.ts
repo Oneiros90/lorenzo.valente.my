@@ -30,6 +30,7 @@ export interface ChessConfig {
 export interface SceneConfig {
   defaultLocale: string;
   renderScale: number;
+  aaRenderScale: number;
   maxDpr: number;
   bootDurationMs: number;
   fadeInSeconds: number;
@@ -40,7 +41,14 @@ export interface SceneConfig {
   orbRadiusPerYear: number;
 }
 
-export type PickId = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export interface SocialConfig {
+  id: string;
+  url: string;
+  colorA: Vec3;
+  colorB: Vec3;
+}
+
+export type PickId = number;
 
 export interface RenderTarget {
   tex: WebGLTexture;

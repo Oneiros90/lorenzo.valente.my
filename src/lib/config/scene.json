@@ -1,6 +1,7 @@
 {
   "defaultLocale": "it",
-  "renderScale": 0.8,
+  "renderScale": 0.7,
+  "aaRenderScale": 1.0,
   "maxDpr": 1.25,
   "bootDurationMs": 1900,
   "fadeInSeconds": 2.0,

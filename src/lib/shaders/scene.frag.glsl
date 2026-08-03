@@ -39,7 +39,7 @@ vec2 opU(vec2 a, vec2 b){ return a.x<b.x?a:b; }
 
 /* ---------- layout ---------- */
 const vec3 WIN_C = vec3(0.,1.8,-3.8);
-const vec2 WIN_B = vec2(2.55,0.85);
+const vec2 WIN_B = vec2(2.95,1.12);
 const vec3 TAB_C = vec3(-0.70,0.83,0.80);
 const vec3 BRD_C = vec3(0.58,0.805,0.82);
 const vec3 OCT_C = vec3(1.12,0.80,1.10);
@@ -51,9 +51,41 @@ vec3 octToLocal(vec3 q){
 vec3 orbPos(int i){
   float fi = float(i);
   float z = 1.18 - fi*0.16;
-  float xOff = (mod(fi, 2.0) < 0.5) ? -0.05 : 0.05;
+  float xOff = (mod(fi, 2.0) < 0.5) ? -0.05 : 0.25;
   float r = uOrbR[i];
   return vec3(-0.22 + xOff, 0.795 + r + 0.015*sin(iTime*1.3+fi*1.9), z);
+}
+vec3 socialPos(int i){
+  /* DAVANTI alle mensole (verso la camera/stanza), non dietro il bordo
+     Mensola: x∈[~3.43,3.67] → orb a x=3.18, r=0.09 → interamente davanti */
+  vec3 b;
+  if(i==0) b=vec3(3.18,2.54,-1.50);
+  else if(i==1) b=vec3(3.18,2.54,-0.70);
+  else if(i==2) b=vec3(3.18,2.54, 0.10);
+  else if(i==3) b=vec3(3.18,1.79,-1.20);
+  else if(i==4) b=vec3(3.18,1.79,-0.20);
+  else if(i==5) b=vec3(3.18,1.04,-1.20);
+  else b=vec3(3.18,1.04,-0.20);
+  b.y += 0.008*sin(iTime*1.4+float(i)*1.7);
+  return b;
+}
+vec3 socialColorA(int i){
+  if(i==0) return vec3(0.09,0.47,0.95);
+  if(i==1) return vec3(0.90,0.25,0.55);
+  if(i==2) return vec3(0.04,0.40,0.76);
+  if(i==3) return vec3(0.15,0.65,0.90);
+  if(i==4) return vec3(0.35,0.40,0.95);
+  if(i==5) return vec3(0.95,0.12,0.12);
+  return vec3(0.40,0.85,0.95);
+}
+vec3 socialColorB(int i){
+  if(i==0) return vec3(0.35,0.65,1.0);
+  if(i==1) return vec3(1.0,0.55,0.20);
+  if(i==2) return vec3(0.25,0.65,0.95);
+  if(i==3) return vec3(0.40,0.85,1.0);
+  if(i==4) return vec3(0.55,0.50,1.0);
+  if(i==5) return vec3(1.0,0.40,0.35);
+  return vec3(0.70,0.95,1.0);
 }
 float sdCapsule(vec3 p, vec3 a, vec3 b, float r){
   vec3 pa=p-a, ba=b-a;
@@ -91,10 +123,20 @@ vec2 map(vec3 p){
   room = min(room, wallF);
   vec2 res = vec2(room, 2.0);
 
-  /* cornice finestra (emissiva) */
-  float fr = sdBox(p-vec3(0.,1.8,-3.66), vec3(2.66,0.96,0.05));
-  fr = max(fr, -sdBox(p-vec3(0.,1.8,-3.66), vec3(2.52,0.82,0.3)));
+  /* cornice finestra — bezel sottile + corner brackets */
+  float fr = sdBox(p-vec3(0.,1.8,-3.66), vec3(3.02,1.18,0.04));
+  fr = max(fr, -sdBox(p-vec3(0.,1.8,-3.66), vec3(2.93,1.10,0.3)));
   res = opU(res, vec2(fr,12.0));
+  if(abs(p.z+3.66)<0.18){
+    vec2 corner = abs(p.xy - WIN_C.xy) - (WIN_B - vec2(0.08));
+    if(abs(corner.x)<0.22 && abs(corner.y)<0.22){
+      float br = sdBox(p-vec3(sign(p.x-WIN_C.x)*(WIN_B.x-0.04), sign(p.y-WIN_C.y)*(WIN_B.y-0.04), -3.66),
+                       vec3(0.10,0.10,0.035));
+      float cut = sdBox(p-vec3(sign(p.x-WIN_C.x)*(WIN_B.x-0.14), sign(p.y-WIN_C.y)*(WIN_B.y-0.14), -3.66),
+                        vec3(0.08,0.08,0.08));
+      res = opU(res, vec2(max(br, -cut), 14.0));
+    }
+  }
 
   /* scrivania */
   vec3 dp = p - vec3(0.,0.75,0.85);
@@ -126,13 +168,15 @@ vec2 map(vec3 p){
     }
   }
 
-  /* sfere olografiche aziende (fluttuanti su piedistalli) */
+  /* sfere olografiche aziende (fluttuanti su piedistalli; LOD: pedestallo solo da vicino) */
   for(int i=0;i<4;i++){
     vec3 op = orbPos(i);
     float r = uOrbR[i];
     res = opU(res, vec2(sdSphere(p-op, r), 20.0+float(i)));
-    res = opU(res, vec2(sdCylinder(p-vec3(op.x,0.795,op.z), 0.010,0.035), 5.0));
-    res = opU(res, vec2(sdCylinder(p-vec3(op.x,0.806,op.z), 0.003,0.030), 14.0));
+    if(length(p-vec3(op.x,0.80,op.z)) < 0.28){
+      res = opU(res, vec2(sdCylinder(p-vec3(op.x,0.795,op.z), 0.010,0.035), 5.0));
+      res = opU(res, vec2(sdCylinder(p-vec3(op.x,0.806,op.z), 0.003,0.030), 14.0));
+    }
   }
 
   /* polpo octocat (rivolto verso la camera) */
@@ -166,15 +210,156 @@ vec2 map(vec3 p){
     }
   }
 
-  /* letto */
-  vec3 ep = p - vec3(2.55,0.34,-1.6);
-  res = opU(res, vec2(sdRoundBox(ep, vec3(1.0,0.13,1.15),0.06), 15.0));
-  res = opU(res, vec2(sdBox(ep-vec3(0.,-0.22,0.), vec3(0.9,0.1,1.05)), 5.0));
-  res = opU(res, vec2(sdBox(ep-vec3(0.,-0.13,0.), vec3(0.94,0.008,1.09)), 14.0)); // glow blu
-  res = opU(res, vec2(sdRoundBox(ep-vec3(0.,0.14,-0.85), vec3(0.72,0.055,0.22),0.045), 15.0)); // cuscino
+  /* letto (gate AABB) */
+  {
+    vec3 ep = p - vec3(2.55,0.34,-1.6);
+    if(abs(ep.x)<1.25 && abs(ep.y)<0.55 && abs(ep.z)<1.45){
+      res = opU(res, vec2(sdRoundBox(ep, vec3(1.0,0.13,1.15),0.06), 15.0));
+      res = opU(res, vec2(sdBox(ep-vec3(0.,-0.22,0.), vec3(0.9,0.1,1.05)), 5.0));
+      res = opU(res, vec2(sdBox(ep-vec3(0.,-0.13,0.), vec3(0.94,0.008,1.09)), 14.0)); // glow blu
+      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,0.14,-0.85), vec3(0.72,0.055,0.22),0.045), 15.0)); // cuscino
+    }
+  }
 
-  /* neon soffitto */
-  res = opU(res, vec2(sdBox(vec3(abs(p.x)-1.9,p.y-3.17,p.z+0.5), vec3(0.025,0.018,2.7)), 14.0));
+  /* neon soffitto (tenue) */
+  res = opU(res, vec2(sdBox(vec3(abs(p.x)-1.9,p.y-3.17,p.z+0.5), vec3(0.018,0.012,2.7)), 14.0));
+
+  /* ---- mensole habitat (early-out per muro) ---- */
+  /* MURO SINISTRO: mensole + piante aliene, armi, tech (non cliccabili) */
+  if(p.x < -2.6){
+    /* tre mensole */
+    for(int s=0;s<3;s++){
+      float sy = 0.88 + float(s)*0.75;
+      res = opU(res, vec2(sdRoundBox(p-vec3(-3.48,sy,-0.45), vec3(0.20,0.022,1.15),0.012), 25.0));
+      /* supporti a muro */
+      res = opU(res, vec2(sdBox(p-vec3(-3.58,sy-0.04,-1.35), vec3(0.04,0.05,0.04)), 25.0));
+      res = opU(res, vec2(sdBox(p-vec3(-3.58,sy-0.04, 0.45), vec3(0.04,0.05,0.04)), 25.0));
+    }
+
+    /* --- mensola alta: attrezzatura tech --- */
+    {
+      float y = 0.88+2.0*0.75;
+      /* monitor / pannello */
+      res = opU(res, vec2(sdRoundBox(p-vec3(-3.42,y+0.12,-1.15), vec3(0.04,0.11,0.16),0.01), 42.0));
+      /* antenna cylinder */
+      res = opU(res, vec2(sdCylinder(p-vec3(-3.40,y+0.18,-0.55), 0.12, 0.018), 25.0));
+      res = opU(res, vec2(sdSphere(p-vec3(-3.40,y+0.32,-0.55), 0.035), 42.0));
+      /* scanner cubico */
+      res = opU(res, vec2(sdRoundBox(p-vec3(-3.40,y+0.07,0.05), vec3(0.08,0.06,0.10),0.015), 42.0));
+      /* batteria / cella energia */
+      res = opU(res, vec2(sdRoundBox(p-vec3(-3.38,y+0.08,0.55), vec3(0.06,0.07,0.06),0.01), 26.0));
+      res = opU(res, vec2(sdBox(p-vec3(-3.32,y+0.08,0.55), vec3(0.008,0.04,0.04)), 27.0));
+      /* piccolo drone ripiegato */
+      res = opU(res, vec2(sdRoundBox(p-vec3(-3.40,y+0.05,-0.05), vec3(0.10,0.035,0.07),0.012), 25.0));
+    }
+
+    /* --- mensola media: piante aliene --- */
+    {
+      float y = 0.88+1.0*0.75;
+      /* vaso 1 + pianta bulbosa */
+      vec3 pot1 = vec3(-3.40, y+0.05, -1.20);
+      res = opU(res, vec2(sdRoundBox(p-pot1, vec3(0.07,0.05,0.07),0.02), 26.0));
+      {
+        vec3 q = p - (pot1+vec3(0.,0.12,0.));
+        float bulb = sdSphere(q, 0.09);
+        float tend = sdCapsule(q, vec3(0.02,0.05,0.), vec3(0.12,0.18,0.05), 0.018);
+        tend = min(tend, sdCapsule(q, vec3(-0.02,0.04,0.), vec3(-0.10,0.20,-0.04), 0.015));
+        float leaf = sdSphere(q-vec3(0.08,0.16,0.04), 0.045);
+        leaf = min(leaf, sdSphere(q-vec3(-0.07,0.18,-0.03), 0.04));
+        float plant = smin(bulb, smin(tend, leaf, 0.03), 0.04);
+        res = opU(res, vec2(plant, 40.0));
+      }
+      /* vaso 2 + spirale */
+      vec3 pot2 = vec3(-3.40, y+0.05, -0.35);
+      res = opU(res, vec2(sdCylinder(p-pot2, 0.055, 0.065), 26.0));
+      {
+        vec3 q = p - (pot2+vec3(0.,0.08,0.));
+        float stem = sdCapsule(q, vec3(0.), vec3(0.,0.28,0.), 0.02);
+        float coil = 1000.0;
+        for(int k=0;k<4;k++){
+          float a = float(k)*1.2 + iTime*0.3;
+          vec3 tip = vec3(0.08*cos(a), 0.08+float(k)*0.06, 0.08*sin(a));
+          coil = min(coil, sdSphere(q-tip, 0.035));
+        }
+        res = opU(res, vec2(smin(stem, coil, 0.03), 40.0));
+      }
+      /* vaso 3 + cristallo organico */
+      vec3 pot3 = vec3(-3.40, y+0.05, 0.45);
+      res = opU(res, vec2(sdRoundBox(p-pot3, vec3(0.06,0.045,0.06),0.015), 26.0));
+      {
+        vec3 q = p - (pot3+vec3(0.,0.10,0.));
+        float c1 = sdCapsule(q, vec3(0.), vec3(0.02,0.22,0.01), 0.025);
+        float c2 = sdCapsule(q, vec3(0.), vec3(-0.06,0.16,0.04), 0.018);
+        float c3 = sdCapsule(q, vec3(0.), vec3(0.05,0.14,-0.05), 0.016);
+        res = opU(res, vec2(min(c1,min(c2,c3)), 40.0));
+      }
+    }
+
+    /* --- mensola bassa: armi --- */
+    {
+      float y = 0.88;
+      /* fucile lungo */
+      {
+        vec3 wp = p - vec3(-3.38, y+0.06, -0.9);
+        float barrel = sdCapsule(wp, vec3(0.,0.,-0.55), vec3(0.,0.,0.55), 0.022);
+        float stock = sdRoundBox(wp-vec3(0.02,-0.02,-0.42), vec3(0.04,0.05,0.12),0.01);
+        float sight = sdBox(wp-vec3(0.,0.04,0.15), vec3(0.015,0.03,0.04));
+        res = opU(res, vec2(min(barrel,min(stock,sight)), 41.0));
+      }
+      /* pistola */
+      {
+        vec3 wp = p - vec3(-3.38, y+0.05, 0.15);
+        float body = sdRoundBox(wp, vec3(0.035,0.04,0.12),0.012);
+        float grip = sdRoundBox(wp-vec3(0.,-0.06,-0.02), vec3(0.03,0.055,0.04),0.01);
+        res = opU(res, vec2(min(body,grip), 41.0));
+      }
+      /* lama energetica / katana short */
+      {
+        vec3 wp = p - vec3(-3.38, y+0.07, 0.75);
+        float blade = sdCapsule(wp, vec3(0.,0.,-0.35), vec3(0.,0.,0.35), 0.012);
+        float hilt = sdCylinder(wp-vec3(0.,0.,-0.38), 0.04, 0.028);
+        res = opU(res, vec2(min(blade,hilt), 41.0));
+        res = opU(res, vec2(sdCapsule(wp, vec3(0.,0.,-0.32), vec3(0.,0.,0.32), 0.006), 27.0));
+      }
+    }
+  }
+
+  /* MURO DESTRO: mensole (gate largo) + sfere SEMPRE in map (SDF continuo!).
+     Gate stretto tipo p.x>3.05 faceva overshoot del march → colpiva lo scaffale
+     al posto della sfera (fasce nere). Le sfere devono essere visibili da lontano
+     nel campo di distanza. */
+  if(p.x > 2.6){
+    for(int s=0;s<3;s++){
+      float sy = 0.88 + float(s)*0.75;
+      res = opU(res, vec2(sdRoundBox(p-vec3(3.55,sy,-0.70), vec3(0.12,0.018,1.05),0.01), 25.0));
+      res = opU(res, vec2(sdBox(p-vec3(3.62,sy-0.03,-1.50), vec3(0.03,0.04,0.03)), 25.0));
+      res = opU(res, vec2(sdBox(p-vec3(3.62,sy-0.03, 0.10), vec3(0.03,0.04,0.03)), 25.0));
+    }
+  }
+  /* social orbs: mai dietro un early-out — sempre nel SDF */
+  {
+    for(int i=0;i<7;i++){
+      vec3 op = socialPos(i);
+      res = opU(res, vec2(sdSphere(p-op, 0.090), 30.0+float(i)));
+    }
+  }
+
+  if(p.z > 2.55){
+    for(int k=0;k<2;k++){
+      float fk=float(k)*2.0-1.0;
+      res = opU(res, vec2(sdBox(p-vec3(fk*1.6,1.7,2.88), vec3(0.06,1.35,0.05)), 26.0));
+    }
+    res = opU(res, vec2(sdRoundBox(p-vec3(-1.2,2.2,2.86), vec3(0.55,0.22,0.04),0.02), 28.0));
+    res = opU(res, vec2(sdBox(p-vec3(-1.2,2.2,2.82), vec3(0.48,0.16,0.01)), 27.0));
+    res = opU(res, vec2(sdRoundBox(p-vec3(1.4,1.35,2.86), vec3(0.35,0.45,0.05),0.02), 26.0));
+  }
+  if(p.y > 2.9){
+    res = opU(res, vec2(sdRoundBox(p-vec3(0.0,3.12,-1.5), vec3(0.9,0.04,0.35),0.02), 26.0));
+    float grill = sdBox(p-vec3(0.0,3.08,-1.5), vec3(0.75,0.01,0.28));
+    res = opU(res, vec2(grill, 28.0));
+    res = opU(res, vec2(sdCylinder(p-vec3(-2.6,3.05,0.8), 0.02, 0.8), 25.0));
+    res = opU(res, vec2(sdCylinder(p-vec3( 2.6,3.05,0.8), 0.02, 0.8), 25.0));
+  }
 
   /* tazza + gadget olografico */
   res = opU(res, vec2(sdCylinder(p-vec3(1.18,0.85,0.60), 0.065,0.045), 17.0));
@@ -186,35 +371,38 @@ vec2 map(vec3 p){
 /* ---------- march / normali / AO / ombre ---------- */
 vec2 march(vec3 ro, vec3 rd){
   float t=0.0, m=-1.0;
-  for(int i=0;i<130;i++){
+  for(int i=0;i<96;i++){
     vec2 h = map(ro+rd*t);
     if(h.x < 0.0006*t+0.0004){ m=h.y; break; }
-    t += h.x*0.9;
-    if(t>28.0){ m=-1.0; break; }
+    t += h.x;
+    if(t>22.0){ m=-1.0; break; }
   }
-  if(t>28.0) m=-1.0;
+  if(t>22.0) m=-1.0;
   return vec2(t,m);
 }
 vec3 calcNormal(vec3 p){
-  vec2 e=vec2(0.0014,-0.0014);
-  return normalize(e.xyy*map(p+e.xyy).x + e.yyx*map(p+e.yyx).x +
-                   e.yxy*map(p+e.yxy).x + e.xxx*map(p+e.xxx).x);
+  float e=0.002;
+  return normalize(vec3(
+    map(p+vec3(e,0.,0.)).x - map(p-vec3(e,0.,0.)).x,
+    map(p+vec3(0.,e,0.)).x - map(p-vec3(0.,e,0.)).x,
+    map(p+vec3(0.,0.,e)).x - map(p-vec3(0.,0.,e)).x
+  ));
 }
 float calcAO(vec3 p, vec3 n){
   float occ=0., sca=1.;
-  for(int i=1;i<=5;i++){
-    float h=0.02+0.11*float(i)/5.0;
+  for(int i=1;i<=3;i++){
+    float h=0.03+0.12*float(i)/3.0;
     occ += (h-map(p+n*h).x)*sca;
-    sca *= 0.72;
+    sca *= 0.7;
   }
-  return clamp(1.0-2.2*occ,0.,1.);
+  return clamp(1.0-2.4*occ,0.,1.);
 }
 float softShadow(vec3 ro, vec3 rd){
   float res=1.0, t=0.03;
-  for(int i=0;i<20;i++){
+  for(int i=0;i<12;i++){
     float h=map(ro+rd*t).x;
     res=min(res,9.0*h/t);
-    t+=clamp(h,0.03,0.35);
+    t+=clamp(h,0.04,0.4);
     if(res<0.02||t>7.0) break;
   }
   return clamp(res,0.,1.);
@@ -225,165 +413,354 @@ float softShadow(vec3 ro, vec3 rd){
    ============================================================ */
 vec3 renderCity(vec3 ro, vec3 rd){
   float t = iTime;
-  /* cielo chiaro e freddo */
-  vec3 col = mix(vec3(0.50,0.58,0.78), vec3(0.10,0.16,0.36), clamp(rd.y*1.5+0.15,0.,1.));
+  vec3 fogCol = vec3(0.08,0.10,0.16);
 
-  /* stelle (tenui, cielo luminoso) */
-  if(rd.y>0.10){
+  /* A. cielo notte */
+  vec3 col = mix(vec3(0.02,0.03,0.06), vec3(0.04,0.06,0.12), clamp(rd.y*0.5+0.5,0.,1.));
+  {
+    vec3 n1 = normalize(vec3(0.35,0.55,-0.7));
+    vec3 n2 = normalize(vec3(-0.55,0.25,-0.6));
+    col += vec3(0.25,0.08,0.35)*exp(-dot(rd-n1,rd-n1)*18.0)*0.12;
+    col += vec3(0.05,0.18,0.35)*exp(-dot(rd-n2,rd-n2)*22.0)*0.10;
+  }
+
+  /* B. Saturno — alto-sinistra, intero nel frame */
+  float satDisk = 0.0;
+  vec3 satDir = normalize(vec3(-0.28,0.16,-1.0));
+  {
+    float ca = dot(rd,satDir);
+    float ang = acos(clamp(ca,-1.,1.));
+    float diskR = 0.118;
+
+    /* anelli: metà anteriore SOPRA il pianeta, metà posteriore dietro */
+    vec3 rx = normalize(cross(satDir, vec3(0.,1.,0.)));
+    vec3 ry = normalize(cross(satDir, rx));
+    vec3 v = rd - satDir*ca;
+    vec2 e = vec2(dot(v,rx)/0.26, dot(v,ry)/0.058);
+    float rr = length(e);
+    float ringBand = smoothstep(0.42,0.50,rr)*smoothstep(1.18,1.05,rr);
+    float cassini = 1.0 - smoothstep(0.74,0.76,rr)*smoothstep(0.82,0.80,rr);
+    float rb = 0.55+0.45*sin(rr*62.0);
+    float ringA = ringBand*cassini*rb;
+    /* e.y < 0 = metà più vicina alla camera (davanti al disco) */
+    float isFront = step(e.y, 0.0);
+    vec3 ringCol = vec3(0.58,0.52,0.46)*(0.55+0.45*rb) + vec3(0.35,0.32,0.36)*0.25;
+
+    /* 1) anelli dietro (solo fuori dal disco) */
+    if(isFront < 0.5 && ang > diskR+0.002){
+      col += ringCol * ringA * 0.85;
+    }
+
+    /* 2) disco pianeta */
+    satDisk = smoothstep(diskR+0.006, diskR-0.003, ang);
+    col += vec3(0.55,0.48,0.40)*exp(-ang*ang*140.0)*0.28;
+    if(satDisk>0.001){
+      float band =
+        0.45*sin((rd.y-satDir.y)*120.0) +
+        0.30*sin((rd.y-satDir.y)*200.0+0.7) +
+        0.20*sin((rd.x-satDir.x)*90.0) +
+        0.15*sin((rd.y-satDir.y)*300.0);
+      band = 0.5+0.5*band;
+      vec3 sc = mix(vec3(0.42,0.38,0.34), vec3(0.78,0.72,0.62), band);
+      sc = mix(sc, vec3(0.55,0.50,0.48), smoothstep(0.35,0.75,abs(rd.y-satDir.y)*12.0));
+      float shade = smoothstep(-0.12,0.12,(rd.x-satDir.x)+0.03);
+      float limb = smoothstep(0.0,0.025,diskR-ang);
+      col = mix(col, sc*(0.40+0.60*shade)*limb, satDisk);
+    }
+
+    /* 3) anelli davanti (passano SOPRA il pianeta) */
+    if(isFront > 0.5){
+      col += ringCol * ringA * 0.95;
+    }
+  }
+
+  /* stelle (dopo Saturno: non sopra il disco) */
+  if(rd.y>0.05 && satDisk<0.5){
     vec2 sph = vec2(atan(rd.x,-rd.z), asin(clamp(rd.y,-1.,1.)));
-    vec2 sg = sph*160.0;
+    vec2 sg = sph*220.0;
     vec2 sid = floor(sg);
     float sh = hash21(sid);
-    if(sh>0.978){
+    if(sh>0.972){
       vec2 sf = fract(sg)-0.5;
-      float st = smoothstep(0.18,0.0,length(sf));
-      float tw = 0.6+0.4*sin(t*2.0+sh*80.0);
-      col += vec3(0.8,0.85,1.0)*st*tw*smoothstep(0.10,0.35,rd.y)*(sh-0.978)*18.0;
+      float st = smoothstep(0.22,0.0,length(sf));
+      float tw = 0.55+0.45*sin(t*1.6+sh*90.0);
+      col += vec3(0.75,0.85,1.0)*st*tw*smoothstep(0.05,0.40,rd.y)*(sh-0.972)*22.0;
     }
   }
 
-  /* Saturno gigante */
-  {
-    vec3 sat = normalize(vec3(-0.42,0.40,-1.0));
-    float ca = dot(rd,sat);
-    float ang = acos(clamp(ca,-1.,1.));
-    float disk = smoothstep(0.155,0.145,ang);
-    if(disk>0.001){
-      float band = 0.5+0.5*sin((rd.y-sat.y)*95.0);
-      vec3 sc = mix(vec3(0.58,0.56,0.62), vec3(0.74,0.70,0.76), band);
-      float shade = smoothstep(-0.14,0.14,(rd.x-sat.x)+0.05);
-      col = mix(col, sc*(0.45+0.55*shade), disk);
-    }
-    vec3 rx = normalize(cross(sat, vec3(0.,1.,0.)));
-    vec3 ry = normalize(cross(sat, rx))*0.28 + rx*0.0;
-    vec3 v = rd - sat*ca;
-    vec2 e = vec2(dot(v,rx)/0.30, dot(v, normalize(cross(sat,rx)))/0.075);
-    float r = length(e);
-    if(ang>0.13 && r>0.55 && r<1.05){
-      float rb = 0.5+0.5*sin(r*55.0);
-      float ring = smoothstep(0.55,0.62,r)*smoothstep(1.05,0.95,r);
-      col += vec3(0.45,0.42,0.50)*ring*rb*0.55;
-    }
-  }
-
-  /* grattacieli, 4 strati con parallasse */
   float hitT = 1e5;
+  /* stazione più alta a destra — corsia di cielo libera dai palazzi */
+  vec3 stationPos = vec3(32.5, 19.5, -110.0);
+
+  /* C. landa Encelado — piano ghiaccio */
+  if(rd.y<-0.02){
+    float tg = (-2.2-ro.y)/rd.y;
+    if(tg>0.){
+      vec3 gp = ro+rd*tg;
+      float crack = max(
+        smoothstep(0.05,0.0,abs(fract(gp.x*0.18+gp.z*0.07)-0.5)-0.47),
+        smoothstep(0.04,0.0,abs(fract(gp.z*0.22-gp.x*0.05)-0.5)-0.47)
+      );
+      float crack2 = smoothstep(0.03,0.0,abs(fract(gp.x*0.55)-0.5)-0.48)
+                   * smoothstep(0.5,0.0,abs(fract(gp.z*0.4)-0.5));
+      vec3 gc = vec3(0.12,0.14,0.18);
+      gc = mix(gc, vec3(0.06,0.08,0.12), crack*0.75);
+      gc += vec3(0.15,0.22,0.30)*crack2*0.35;
+      vec3 nApprox = normalize(vec3(crack*0.4-0.2, 1.0, crack2*0.3));
+      float spec = pow(max(dot(nApprox, satDir),0.0), 8.0);
+      gc += vec3(0.45,0.42,0.38)*spec*0.25;
+      float fogA = 1.0-exp(-tg*0.025);
+      col = mix(gc, fogCol, fogA);
+      hitT = tg;
+    }
+  }
+
+  /* heightfield ridge mid-ground (sotto l’orizzonte) */
   if(rd.z < -0.02){
-    for(int i=0;i<4;i++){
-      float fi = float(i);
-      float lz = -(9.0 + fi*14.0);
-      float tt = (lz-ro.z)/rd.z;
-      if(tt<0.) continue;
-      vec3 p = ro + rd*tt;
-      float bw = 2.0 + fi*1.7;
-      float xx = p.x/bw + fi*7.31;
-      float id = floor(xx);
-      float fx = fract(xx);
-      float hh = hash21(vec2(id,fi));
-      float gap = step(0.10, hash21(vec2(id*3.1, fi+9.0)));
-      float bh = (1.5 + hh*hh*15.0 + fi*3.5)*gap;
-      float edge = smoothstep(0.02,0.07,fx)*smoothstep(0.98,0.93,fx);
-      if(p.y<bh && p.y>-3.0 && edge>0.5){
-        hitT = tt;
-        vec3 base = vec3(0.055,0.065,0.10)*(1.0+fi*0.7);
-        vec2 wuv = vec2(p.x/0.30, p.y/0.22);
-        vec2 wid = floor(wuv);
-        vec2 wf  = fract(wuv);
-        float lit = step(hash21(wid+id*0.37), 0.42);
-        float wm  = step(0.28,wf.x)*step(wf.x,0.72)*step(0.22,wf.y)*step(wf.y,0.78);
-        float wh = hash21(wid*1.71+3.0);
-        vec3 wc = wh<0.30 ? vec3(0.45,0.30,1.0) :
-                  wh<0.58 ? vec3(0.15,0.65,1.0) :
-                  wh<0.82 ? vec3(1.0,0.85,0.60) : vec3(1.0,0.35,0.75);
-        float flick = 0.78+0.22*sin(t*3.0+hash21(wid)*40.0);
-        vec3 c = base + wc*lit*wm*flick*1.7;
-        /* faro sul tetto */
-        c += vec3(1.0,0.2,0.45)*smoothstep(0.18,0.0,abs(p.y-bh+0.12))
-             *step(0.65,hash21(vec2(id,5.0)))*(0.5+0.5*sin(t*2.5+id*3.0));
-        /* insegna al neon */
-        if(hash21(vec2(id,33.0+fi))>0.78 && bh>4.0){
-          vec2 suv = (p.xy - vec2((id-fi*7.31+0.5)*bw, bh*0.55))/vec2(bw*0.28, 1.1);
-          float sign = step(abs(suv.x),1.0)*step(abs(suv.y),1.0);
-          float sflick = step(0.15, fract(sin(floor(t*9.0)*12.9+id)*43.75));
-          float sh2 = hash21(vec2(id,2.0));
-          vec3 scol = sh2<0.34 ? vec3(1.0,0.20,0.80) :
-                      sh2<0.67 ? vec3(0.15,0.85,1.0) : vec3(1.0,0.60,0.20);
-          float pat = 0.55+0.45*sin(suv.y*18.0+suv.x*5.0+t);
-          c += scol*sign*sflick*pat*3.0;
-        }
-        float fogA = 1.0-exp(-tt*0.030);
-        col = mix(c, vec3(0.40,0.46,0.64), fogA);
+    for(int ri=0;ri<2;ri++){
+      float rz = ri==0 ? -42.0 : -68.0;
+      float tr = (rz-ro.z)/rd.z;
+      if(tr<0. || tr>=hitT) continue;
+      vec3 rp = ro+rd*tr;
+      float h = 0.35 + 0.55*hash21(vec2(floor(rp.x*0.12), float(ri)))
+              + 0.7*sin(rp.x*0.07+float(ri)) + 0.35*sin(rp.x*0.19*1.7);
+      h *= 1.0 - 0.2*float(ri);
+      if(rp.y < h && rp.y > -3.0){
+        float slope = smoothstep(h, h-0.9, rp.y);
+        vec3 rc = mix(vec3(0.10,0.12,0.16), vec3(0.18,0.20,0.24), slope);
+        float crev = smoothstep(0.04,0.0,abs(fract(rp.x*0.35)-0.5)-0.46);
+        rc = mix(rc, vec3(0.05,0.07,0.10), crev*0.7);
+        float fogA = 1.0-exp(-tr*0.022);
+        col = mix(rc, fogCol, fogA);
+        hitT = tr;
         break;
       }
     }
   }
 
-  /* suolo ghiacciato con griglia */
-  if(hitT>9e4 && rd.y<-0.02){
-    float tg = (-2.2-ro.y)/rd.y;
-    if(tg>0.){
-      vec3 gp = ro+rd*tg;
-      float grid = max( smoothstep(0.06,0.0,abs(fract(gp.x*0.25)-0.5)-0.46),
-                        smoothstep(0.06,0.0,abs(fract(gp.z*0.25)-0.5)-0.46) );
-      vec3 gc = vec3(0.30,0.34,0.44) + vec3(0.4,0.3,1.0)*grid*0.30;   /* ghiaccio chiaro */
-      float fogA = 1.0-exp(-tg*0.05);
-      col = mix(gc, vec3(0.40,0.46,0.64), fogA);
-      hitT = tg;
+  /* pennacchi criovolcanici */
+  if(hitT>55.0 && rd.z<-0.05){
+    float tp2 = (-78.0-ro.z)/rd.z;
+    if(tp2>0.){
+      vec3 pp = ro+rd*tp2;
+      for(int i=0;i<3;i++){
+        float px = float(i)*42.0-40.0;
+        float g = exp(-pow((pp.x-px)*0.04,2.0));
+        float vfade = smoothstep(40.0,3.0,pp.y)*smoothstep(-2.0,6.0,pp.y);
+        float pulse = 0.75+0.25*sin(t*0.55+float(i)*2.4);
+        col += vec3(0.45,0.65,0.95)*g*vfade*0.16*pulse;
+      }
     }
   }
 
-  /* pennacchi di ghiaccio all'orizzonte */
-  if(hitT>60.0 && rd.z<-0.05){
-    float tp2 = (-70.0-ro.z)/rd.z;
-    vec3 pp = ro+rd*tp2;
-    for(int i=0;i<2;i++){
-      float px = float(i)*46.0-20.0;
-      float g = exp(-pow((pp.x-px)*0.05,2.0));
-      float vfade = smoothstep(28.0,2.0,pp.y)*smoothstep(-2.0,4.0,pp.y);
-      col += vec3(0.35,0.5,0.85)*g*vfade*0.10*(0.8+0.2*sin(t*0.7+float(i)*3.0));
-    }
-  }
-
-  /* navi in volo con scia */
-  if(rd.z<-0.01){
-    for(int i=0;i<7;i++){
-      float fi=float(i);
-      float depth = 11.0+fi*5.5;
-      float dirS  = mod(fi,2.0)<1.0?1.0:-1.0;
-      float speed = (2.0+hash11(fi)*4.0)*dirS;
-      float range = 34.0;
-      float sy = 2.2+hash11(fi*7.0)*8.5;
-      float sx = mod(t*speed + hash11(fi*3.0)*range*2.0, range*2.0)-range;
-      vec3 sp = vec3(sx, sy, -depth);
-      float tproj = (sp.z-ro.z)/rd.z;
-      if(tproj>0.0 && tproj<hitT){
-        vec3 hue = mix(vec3(0.4,0.6,1.0), vec3(1.0,0.4,0.9), hash11(fi*13.0));
-        for(int k=0;k<4;k++){
-          vec3 tpos = sp - vec3(dirS*float(k)*0.55,0.,0.);
-          vec3 dir = normalize(tpos-ro);
-          float dd = 1.0-dot(rd,dir);
-          float fall = 1.0-float(k)*0.24;
-          col += hue * 0.000012/(0.0000015+dd*dd*4.0) * fall * 0.032;
+  /* D. stazione orbitale — hub + pannelli (silhouette metallica, non anello glow) */
+  if(rd.z < -0.01 && rd.y > -0.02){
+    float ts = (stationPos.z-ro.z)/rd.z;
+    if(ts>0.0 && ts<hitT){
+      vec3 sp = ro+rd*ts;
+      vec2 uv = (sp.xy - stationPos.xy) * 0.085;
+      if(length(uv) < 2.2){
+        vec2 a = abs(uv);
+        /* hub centrale */
+        float hub = max(a.x-0.28, a.y-0.20);
+        hub = max(hub, max(a.x*0.6+a.y*0.35, a.y)-0.26);
+        /* spine di docking */
+        float spine = max(a.x-0.06, a.y-0.70);
+        /* bracci */
+        float arm = max(abs(uv.y)-0.05, abs(abs(uv.x)-0.55)-0.22);
+        /* pannelli solari */
+        float panel = max(abs(uv.y)-0.14, abs(abs(uv.x)-1.15)-0.48);
+        float strut = max(abs(uv.y)-0.025, abs(abs(uv.x)-0.70)-0.12);
+        float body = min(min(hub, spine), min(arm, min(panel, strut)));
+        float mask = smoothstep(0.035, -0.01, body);
+        if(mask > 0.01){
+          vec3 metal = vec3(0.22,0.26,0.32);
+          float litWin = step(0.55, hash21(floor(uv*14.0)))
+                       * smoothstep(0.08,0.0,hub+0.02)
+                       * (0.55+0.45*sin(t*1.8+uv.x*6.0));
+          float panelLine = smoothstep(0.02,0.0,abs(fract(uv.x*3.5)-0.5)-0.42)
+                          * smoothstep(0.05,0.0,panel);
+          vec3 sc = metal * mask;
+          sc += vec3(0.35,0.75,1.0)*litWin*0.9;
+          sc += vec3(0.15,0.25,0.40)*panelLine*mask;
+          sc += vec3(0.5,0.85,1.0)*smoothstep(0.06,0.0,abs(spine+0.02))*0.35
+              * (0.6+0.4*sin(t*3.0));
+          float fogA = 1.0-exp(-ts*0.010);
+          col = mix(col, mix(sc, fogCol, fogA*0.35), clamp(mask,0.,1.));
         }
       }
     }
   }
 
-  /* ologramma gigante */
+  /* E. metropoli — skyline BASSO sull’orizzonte (non riempie il frame)
+     Composizione: ~40% basso = città+landa; alto = cielo/Saturno/stazione.
+     Skip se il raggio guarda troppo in alto. */
+  if(rd.z < -0.02 && rd.y < 0.12){
+    for(int i=0;i<4;i++){
+      float fi = float(i);
+      /* lontana: sotto l’orizzonte, non a pochi metri dalla finestra */
+      float lz = -(28.0 + fi*16.0);
+      float tt = (lz-ro.z)/rd.z;
+      if(tt<0. || tt>hitT) continue;
+      vec3 p = ro + rd*tt;
+
+      /* corridoio sinistro per Saturno; destro alto già protetto da rd.y */
+      float sideClear = smoothstep(-10.0,-2.0,p.x); /* meno densità a sinistra */
+      float bw = 2.4 + fi*2.0;
+      float xx = p.x/bw + fi*5.17;
+      float id = floor(xx);
+      float fx = fract(xx);
+      float hh = hash21(vec2(id,fi));
+      /* ~45% celle vuote + rarefazione a sinistra */
+      float gap = step(0.45, hash21(vec2(id*3.1, fi+9.0))*sideClear);
+      /* altezze contenute: skyline, non canyon urbano */
+      float bh = (0.55 + hh*hh*3.8 + fi*0.55)*gap;
+      /* hard cap: non salire nel cielo di Saturno */
+      bh = min(bh, 4.2 - fi*0.35);
+      if(bh < 0.15) continue;
+
+      float typeH = hash21(vec2(id*1.7, fi*4.2));
+      float typ = floor(typeH*4.0);
+
+      float silhouette = 0.0;
+      if(typ < 0.5){
+        silhouette = step(p.y, bh)*step(-2.5, p.y);
+      } else if(typ < 1.5){
+        float setBh = bh * (1.0 - 0.28*step(0.5, abs(fx-0.5)*2.0));
+        if(p.y > bh*0.55) setBh = bh * (0.55 + 0.20*step(0.35,fx)*step(fx,0.65));
+        silhouette = step(p.y, setBh)*step(-2.5, p.y);
+      } else if(typ < 2.5){
+        float py = bh * max(0.0, 1.0 - abs(fx-0.5)*1.7);
+        silhouette = step(p.y, py)*step(-2.5, p.y);
+      } else {
+        float twin = step(0.16, abs(fx-0.5));
+        silhouette = twin * step(p.y, bh)*step(-2.5, p.y);
+      }
+
+      float bridge = 0.0;
+      if(fi>0.5 && fi<2.5 && hash21(vec2(id,fi+40.0))>0.94){
+        float by = 1.2 + hh*1.5;
+        bridge = step(abs(p.y-by),0.08)*step(abs(fx-0.5),0.55)*step(by, bh);
+      }
+
+      float edge = smoothstep(0.02,0.08,fx)*smoothstep(0.98,0.92,fx);
+      if((silhouette>0.5 && edge>0.5) || bridge>0.5){
+        hitT = tt;
+        vec3 base = vec3(0.04,0.05,0.08)*(1.0+fi*0.45);
+        vec2 wuv = vec2(p.x/0.28, p.y/0.18);
+        vec2 wid = floor(wuv);
+        vec2 wf  = fract(wuv);
+        float lit = step(hash21(wid+id*0.37), 0.38);
+        float wm  = step(0.26,wf.x)*step(wf.x,0.74)*step(0.20,wf.y)*step(wf.y,0.80);
+        float wh = hash21(wid*1.71+3.0);
+        vec3 wc = wh<0.35 ? vec3(0.35,0.45,1.0) :
+                  wh<0.62 ? vec3(0.15,0.75,1.0) :
+                  wh<0.85 ? vec3(0.70,0.85,1.0) : vec3(0.85,0.40,1.0);
+        float flick = 0.80+0.20*sin(t*2.5+hash21(wid)*40.0);
+        vec3 c = base + wc*lit*wm*flick*1.45;
+        c += base*bridge*2.0 + vec3(0.2,0.5,0.8)*bridge*0.8;
+
+        if(typ > 0.5){
+          c += vec3(0.6,0.85,1.0)*smoothstep(0.18,0.0,abs(p.y-bh+0.06))
+               *step(abs(fx-0.5),0.06)*(0.5+0.5*sin(t*3.0+id));
+        } else {
+          c += vec3(1.0,0.25,0.55)*smoothstep(0.14,0.0,abs(p.y-bh+0.08))
+               *step(0.70,hash21(vec2(id,5.0)))*(0.5+0.5*sin(t*2.5+id*3.0));
+        }
+
+        if(hash21(vec2(id,33.0+fi))>0.82 && bh>2.2){
+          vec2 suv = (p.xy - vec2((id-fi*5.17+0.5)*bw, bh*0.55))/vec2(bw*0.28, 0.7);
+          float sign = step(abs(suv.x),1.0)*step(abs(suv.y),1.0);
+          float sflick = step(0.12, fract(sin(floor(t*8.0)*12.9+id)*43.75));
+          float sh2 = hash21(vec2(id,2.0));
+          vec3 scol = sh2<0.40 ? vec3(0.2,0.85,1.0) :
+                      sh2<0.75 ? vec3(0.7,0.35,1.0) : vec3(1.0,0.55,0.25);
+          float pat = 0.55+0.45*sin(suv.y*18.0+suv.x*5.0+t);
+          c += scol*sign*sflick*pat*2.2;
+        }
+
+        float fogA = 1.0-exp(-tt*0.022);
+        col = mix(c, fogCol, fogA);
+        break;
+      }
+    }
+  }
+
+  /* navi: piccole astronavi (fusoliera + ali + scia motore) */
   if(rd.z<-0.01){
-    float th = (-17.0-ro.z)/rd.z;
-    if(th>0.0 && th<hitT){
-      vec3 hp = ro+rd*th;
-      vec2 huv = hp.xy - vec2(-5.5,7.0);
-      float head = length((huv-vec2(0.,2.3))*vec2(1.0,0.95))-0.62;
-      vec2 bq = vec2(huv.x, max(abs(huv.y-0.4)-1.25,0.0));
-      float body = length(bq)-0.85;
-      float fig = min(head,body);
-      float glow = smoothstep(0.22,-0.1,fig);
-      float scan = 0.6+0.4*sin(hp.y*22.0-t*9.0);
-      float flick = 0.82+0.18*sin(t*31.0)*sin(t*7.3);
-      col += vec3(0.22,0.6,1.0)*glow*scan*flick*0.85;
-      col += vec3(0.4,0.3,1.0)*smoothstep(1.4,-0.6,fig)*0.10;
+    for(int i=0;i<6;i++){
+      float fi = float(i);
+      float seed = hash11(fi*13.7);
+      float speed = 0.07 + seed*0.10;
+      float phase = fract(t*speed + seed);
+      float ease = smoothstep(0.0,1.0,phase);
+      vec3 dest = vec3(
+        stationPos.x + mix(-20.0, 3.0, hash11(fi*3.1)) - phase*9.0,
+        mix(stationPos.y - 1.5, 2.5 + hash11(fi*5.5)*4.5, ease),
+        mix(stationPos.z + 2.0, -32.0 - fi*5.0, ease)
+      );
+      float lift = 1.2 + seed*1.2;
+      vec3 sp = mix(stationPos, dest, ease) + vec3(0., lift*sin(phase*PI), 0.);
+      vec3 vel = dest - stationPos;
+      vel.y += lift*PI*cos(phase*PI)*0.12;
+      float vlen = length(vel);
+      if(vlen < 1e-4) continue;
+      vec3 fw = vel/vlen;
+      vec3 rt = normalize(cross(fw, vec3(0.,1.,0.)));
+      if(length(cross(fw, vec3(0.,1.,0.))) < 0.08)
+        rt = normalize(cross(fw, vec3(1.,0.,0.)));
+      vec3 upv = cross(rt, fw);
+
+      float dist = length(sp-ro);
+      vec3 dShip = (sp-ro)/dist;
+      float scl = 0.55 + seed*0.25;
+      float maxAng = 2.2*scl/dist;
+      if(acos(clamp(dot(rd,dShip),-1.,1.)) > maxAng) continue;
+      float tp = dist / max(dot(rd,dShip), 0.2);
+      if(tp<0.0 || tp>hitT) continue;
+      vec3 hp = ro + rd*tp;
+      vec3 q = hp - sp;
+      float along = dot(q, fw)/scl;
+      float side  = dot(q, rt)/scl;
+      float vert  = dot(q, upv)/scl;
+      vec2 p2 = vec2(along, side);
+
+      /* fusoliera a diamante allungato */
+      float halfL = 0.85;
+      float fuseW = 0.13 * (1.0 - abs(along)/halfL);
+      float fuse = max(abs(along)-halfL, abs(side)-fuseW);
+      fuse = max(fuse, abs(vert)-0.08);
+      /* ali a delta */
+      float wingSpan = 0.55 * clamp(1.0 - (along+0.15)/0.7, 0.0, 1.0);
+      float wing = max(abs(along+0.05)-0.35, abs(side)-wingSpan);
+      wing = max(wing, abs(vert)-0.03);
+      /* coda / pinna */
+      float fin = max(abs(along+0.55)-0.18, abs(side)-0.04);
+      fin = max(fin, abs(vert)-0.16*(1.0-abs(along+0.55)/0.18));
+
+      float hull = min(fuse, min(wing, fin));
+      float mask = smoothstep(0.04, -0.01, hull);
+      if(mask < 0.01) continue;
+
+      vec3 bodyCol = mix(vec3(0.55,0.62,0.72), vec3(0.35,0.40,0.48), seed);
+      float canopy = smoothstep(0.12,0.0, length(vec2(along-0.25, side)*vec2(1.4,2.2)))
+                   * step(abs(vert),0.1);
+      vec3 hue = bodyCol*mask;
+      hue += vec3(0.25,0.55,0.85)*canopy*0.8;
+      /* motore: solo in coda */
+      float eng = smoothstep(0.22,0.0, length(vec2(along+0.78, side)*vec2(1.6,2.5)))
+                * step(along, -0.55);
+      vec3 exhaust = mix(vec3(0.4,0.85,1.0), vec3(1.0,0.55,0.25), step(0.75,seed));
+      hue += exhaust*eng*(1.1+0.4*sin(t*20.0+fi*5.0));
+      /* scia corta dietro */
+      for(int k=1;k<=3;k++){
+        float fk = float(k);
+        vec3 trailP = sp - fw*scl*(0.5+fk*0.55);
+        vec3 dt = normalize(trailP-ro);
+        float dang = 1.0-dot(rd,dt);
+        hue += exhaust * 0.000008/(0.000002+dang*dang*8.0) * (1.0-fk*0.28);
+      }
+      col += hue * 1.15;
     }
   }
 
@@ -453,25 +830,52 @@ vec3 tabletUI(vec2 uv, float hover, float focus){
    ============================================================ */
 vec3 shade(vec3 pos, vec3 rd, float mid){
   float t = iTime;
-  vec3 n = calcNormal(pos);
-  vec3 v = -rd;
-  float fres = pow(1.0-max(dot(n,v),0.0),3.0);
   float hovT = uHover==1.0?1.0:0.0;
   float hovB = uHover==2.0?1.0:0.0;
   float focT = uActive==1.0?1.0:0.0;
   float focB = uActive==2.0?1.0:0.0;
   float focO = uActive==3.0?1.0:0.0;
 
-  /* ----- materiali emissivi puri ----- */
-  if(mid==7.0){ /* schermo tablet */
+  /* emissivi puri — niente normali / AO / ombre */
+  if(mid==7.0){
     vec3 tp = pos - TAB_C;
     tp.yz = rot2(0.5)*tp.yz;
     vec2 uv = vec2(tp.x/0.185, -tp.z/0.125);
     return tabletUI(uv, hovT, focT)*2.6;
   }
-  if(mid==12.0) return vec3(0.60,0.50,0.95)*(0.55+0.10*sin(t*1.5));
-  if(mid==13.0) return vec3(0.7,0.25,1.0)*2.8;
-  if(mid==14.0) return vec3(0.18,0.5,1.0)*(2.4+0.4*sin(t*2.0+pos.x*2.0));
+  if(mid==12.0) return vec3(0.35,0.55,0.75)*(0.4+0.08*sin(t*0.8));
+  if(mid==13.0) return vec3(0.45,0.25,0.75)*1.6;
+  if(mid==14.0) return vec3(0.22,0.45,0.7)*(1.2+0.15*sin(t*1.2+pos.x*2.0));
+  if(mid==27.0){
+    float steady = 0.55+0.15*sin(t*0.7+pos.x*2.0);
+    return vec3(0.15,0.45,0.6)*steady*1.1;
+  }
+  /* social orbs — emissivi puri, luminosi, zero dipendenza da luci/AO */
+  if(mid>=30.0 && mid<37.0){
+    int oi = int(mid-30.0);
+    vec3 ca = socialColorA(oi), cb = socialColorB(oi);
+    vec3 op = socialPos(oi);
+    vec3 lp = pos - op;
+    float r = 0.090;
+    vec3 nA = lp / max(length(lp), 1e-4);
+    float lat = clamp(lp.y / r, -1.0, 1.0);
+    float lon = atan(lp.z, lp.x);
+    float swirl = 0.5 + 0.5*sin(lat*4.5 + lon*2.0 + t*(1.2+float(oi)*0.25));
+    vec3 hue = mix(ca, cb, swirl);
+    float ring = smoothstep(0.14, 0.0, abs(lat - 0.2*sin(t*0.9+float(oi))));
+    float hov = (uHover==8.0+float(oi)) ? 1.0 : 0.0;
+    /* glow costante + alone verso camera (desk a -X) */
+    float glow = 1.35 + 0.45*max(-nA.x, 0.0);
+    vec3 c = hue * glow + hue * ring * 0.85 + mix(ca, cb, 0.5) * 0.45;
+    c += vec3(1.0) * (0.08 + 0.12*hov);
+    c *= 1.15 + hov * 0.9;
+    return c;
+  }
+
+  vec3 n = calcNormal(pos);
+  vec3 v = -rd;
+  float fres = pow(1.0-max(dot(n,v),0.0),3.0);
+
   if(mid==18.0){
     float pulse = 0.6+0.4*sin(t*4.0);
     float scan = 0.7+0.3*sin(pos.y*160.0-t*10.0);
@@ -549,41 +953,92 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
   float gloss = 0.0;
   vec3 emis = vec3(0.0);
 
-  if(mid==2.0){ /* stanza */
+  if(mid==2.0){ /* stanza — habitat Enceladus */
     if(n.y>0.9){ /* pavimento */
-      alb = vec3(0.11,0.11,0.13);
-      gloss = 0.75;
-      float gr = max( smoothstep(0.03,0.0,abs(fract(pos.x*0.9)-0.5)-0.47),
-                      smoothstep(0.03,0.0,abs(fract(pos.z*0.9)-0.5)-0.47) );
-      emis += vec3(0.35,0.25,0.9)*gr*0.08;
+      alb = vec3(0.07,0.075,0.09);
+      gloss = 0.55;
+      vec2 gp = pos.xz*0.55;
+      float seam = max(
+        smoothstep(0.04,0.0,abs(fract(gp.x)-0.5)-0.46),
+        smoothstep(0.04,0.0,abs(fract(gp.y)-0.5)-0.46)
+      );
+      alb = mix(alb, vec3(0.04,0.045,0.055), seam*0.7);
+      float hex = abs(fract(pos.x*0.35+pos.z*0.2)-0.5)+abs(fract(pos.z*0.35-pos.x*0.15)-0.5);
+      alb *= 0.92+0.08*smoothstep(0.55,0.35,hex);
+      emis += vec3(0.15,0.35,0.55)*seam*0.04;
+      float frost = smoothstep(0.15,0.0,abs(pos.z+2.8))*0.08;
+      alb += vec3(0.04,0.07,0.10)*frost;
+      /* strip centrale (ex SDF mid 25) */
+      float strip = step(abs(pos.x),0.35)*step(abs(pos.z-0.2),2.2);
+      alb = mix(alb, vec3(0.08,0.085,0.10), strip*0.85);
+      gloss = mix(gloss, 0.45, strip);
+      emis += vec3(0.12,0.28,0.38)*strip*0.06;
     } else if(n.y<-0.9){ /* soffitto */
-      alb = vec3(0.12,0.12,0.14);
-      float pan = step(0.94,fract(pos.x*0.7))+step(0.94,fract(pos.z*0.7));
-      alb *= 1.0-0.5*clamp(pan,0.,1.);
+      alb = vec3(0.08,0.085,0.10);
+      float pan = step(0.92,fract(pos.x*0.55))+step(0.92,fract(pos.z*0.55));
+      alb *= 1.0-0.45*clamp(pan,0.,1.);
+      float recess = smoothstep(0.08,0.0,abs(abs(pos.x)-1.9)-0.15)*smoothstep(2.2,0.0,abs(pos.z+0.5));
+      emis += vec3(0.25,0.40,0.55)*recess*0.12;
     } else { /* pareti */
-      alb = vec3(0.13,0.13,0.16);
-      float pan = step(0.95,fract(pos.y*1.3))+step(0.95,fract((pos.x+pos.z)*0.8));
-      emis += vec3(0.2,0.15,0.5)*clamp(pan,0.,1.)*0.05;
-      /* poster olografico parete destra */
-      if(pos.x>3.55 && abs(pos.z+0.35)<0.55 && abs(pos.y-1.8)<0.62){
-        vec2 puv = vec2((pos.z+0.35)/0.5, (pos.y-1.8)/0.55);
-        float frame = step(abs(puv.x),1.0)*step(abs(puv.y),1.0);
-        float brd = frame - step(abs(puv.x),0.92)*step(abs(puv.y),0.94);
-        float fig = length((puv-vec2(0.,0.25))*vec2(1.6,1.0))-0.28;
-        fig = min(fig, length(vec2(puv.x*1.8, max(abs(puv.y+0.3)-0.35,0.)))-0.30);
-        float scan = 0.6+0.4*sin(puv.y*40.0-t*6.0);
-        emis += vec3(0.5,0.25,1.0)*brd*1.2;
-        emis += vec3(0.2,0.7,1.0)*smoothstep(0.06,-0.06,fig)*frame*scan*0.9;
-      }
-      /* strisce luminose parete sinistra */
+      alb = vec3(0.09,0.095,0.115);
+      gloss = 0.18;
+      float vSeam = smoothstep(0.035,0.0,abs(fract(pos.y*0.85)-0.5)-0.47);
+      float hSeam = smoothstep(0.035,0.0,abs(fract((pos.x+pos.z)*0.45)-0.5)-0.47);
+      float seam = max(vSeam, hSeam);
+      alb = mix(alb, vec3(0.05,0.055,0.07), seam*0.85);
+      float plate = smoothstep(0.12,0.0,abs(fract(pos.y*0.42)-0.5)-0.38);
+      alb *= 0.88+0.12*plate;
+
+      /* brina / patina fredda vicino alla finestra */
+      float cold = smoothstep(-2.5,-3.5,pos.z)*0.12;
+      alb += vec3(0.03,0.06,0.09)*cold;
+
+      /* rivetti strutturali */
+      vec2 rivUV = vec2(pos.y*2.2, (pos.x+pos.z)*1.6);
+      float riv = smoothstep(0.07,0.02,length(fract(rivUV)-0.5));
+      alb = mix(alb, vec3(0.16,0.17,0.20), riv*0.55*seam);
+
+      /* conduit lines — dim, steady */
+      float conduit = smoothstep(0.012,0.0,abs(fract(pos.y*1.1+0.25)-0.5)-0.48);
+      emis += vec3(0.12,0.28,0.42)*conduit*0.06;
+
+      /* status ticks (molto tenui, quasi statici) */
+      float tick = step(0.97,fract(pos.y*3.5+hash11(floor(pos.z*2.0))*0.3));
+      emis += vec3(0.2,0.55,0.7)*tick*conduit*0.15;
+
+      /* parete sinistra: texture fredda dietro le mensole */
       if(pos.x<-3.55){
-        float ls = smoothstep(0.025,0.0,abs(pos.y-1.55)) + smoothstep(0.025,0.0,abs(pos.y-2.15));
-        emis += vec3(0.5,0.2,1.0)*ls*0.8*step(abs(pos.z+0.8),1.6);
+        float rib = smoothstep(0.04,0.0,abs(fract(pos.z*0.55)-0.5)-0.46);
+        alb = mix(alb, vec3(0.06,0.07,0.09), rib*0.5);
+        float frostL = 0.04+0.03*sin(pos.z*8.0+pos.y*3.0);
+        alb += vec3(0.02,0.05,0.07)*frostL;
+      }
+
+      /* parete destra: texture neutra dietro orbs social */
+      if(pos.x>3.55){
+        float rib = smoothstep(0.04,0.0,abs(fract(pos.z*0.5)-0.5)-0.46);
+        alb = mix(alb, vec3(0.055,0.06,0.075), rib*0.4);
+      }
+
+      /* parete dietro: porta di servizio / sigilli */
+      if(pos.z>2.7){
+        float door = smoothstep(0.9,0.7,abs(pos.x))*smoothstep(0.9,0.55,abs(pos.y-1.5));
+        alb = mix(alb, vec3(0.06,0.065,0.08), door*0.6);
+        float seal = smoothstep(0.025,0.0,abs(abs(pos.x)-1.05))*smoothstep(1.2,0.0,abs(pos.y-1.5));
+        emis += vec3(0.3,0.55,0.5)*seal*0.2;
+        float idPlate = step(abs(pos.x+2.2),0.35)*step(abs(pos.y-2.55),0.12);
+        emis += vec3(0.2,0.45,0.6)*idPlate*0.3;
+      }
+
+      /* cornice finestra — alone freddo */
+      if(pos.z<-3.5){
+        float winEdge = smoothstep(0.28,0.0,abs(abs(pos.x)-WIN_B.x))*smoothstep(0.28,0.0,abs(abs(pos.y-WIN_C.y)-WIN_B.y));
+        emis += vec3(0.2,0.45,0.7)*winEdge*0.18;
       }
     }
   }
-  else if(mid==4.0){ alb=vec3(0.14,0.14,0.16); gloss=0.85; }     /* piano scrivania */
-  else if(mid==5.0){ alb=vec3(0.09,0.09,0.11); gloss=0.2; }      /* metallo */
+  else if(mid==4.0){ alb=vec3(0.14,0.14,0.16); gloss=0.85; }
+  else if(mid==5.0){ alb=vec3(0.09,0.09,0.11); gloss=0.2; }
   else if(mid==6.0){
     alb=vec3(0.03,0.03,0.04); gloss=0.5;
     if(focT>0.5){
@@ -617,39 +1072,81 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
       emis += vec3(0.7,0.35,1.0)*rim*(0.5+0.5*sin(t*6.0));
     }
   }
-  else if(mid==15.0){ alb=vec3(0.30,0.28,0.30); gloss=0.05; }    /* tessuto letto chiaro */
-  else if(mid==17.0){ /* tazza */
+  else if(mid==15.0){ alb=vec3(0.30,0.28,0.30); gloss=0.05; }
+  else if(mid==17.0){
     alb=vec3(0.06,0.06,0.08); gloss=0.4;
     vec3 mp = pos-vec3(1.18,0.85,0.60);
-    emis += vec3(0.6,0.3,1.0)*smoothstep(0.012,0.0,abs(mp.y-0.055))*0.9;   /* bordo caldo */
+    emis += vec3(0.6,0.3,1.0)*smoothstep(0.012,0.0,abs(mp.y-0.055))*0.9;
     float logo = smoothstep(0.03,0.02,length(vec2(atan(mp.x,mp.z)*0.045, mp.y+0.01)));
     emis += vec3(0.3,0.7,1.0)*logo*0.6;
+  }
+  else if(mid==25.0){ /* tubi / rack metallo scuro */
+    alb = vec3(0.08,0.085,0.10);
+    gloss = 0.45;
+    emis += vec3(0.15,0.3,0.4)*pow(fres,2.5)*0.15;
+  }
+  else if(mid==26.0){ /* box / bulkhead */
+    alb = vec3(0.06,0.065,0.08);
+    gloss = 0.25;
+    float edge = pow(fres, 3.0);
+    emis += vec3(0.12,0.25,0.35)*edge*0.2;
+  }
+  else if(mid==28.0){ /* display / griglia */
+    alb = vec3(0.03,0.04,0.05);
+    gloss = 0.1;
+    float lines = max(
+      smoothstep(0.03,0.0,abs(fract(pos.y*18.0)-0.5)-0.46),
+      smoothstep(0.03,0.0,abs(fract(pos.z*14.0+pos.x*14.0)-0.5)-0.46)
+    );
+    emis += vec3(0.2,0.55,0.7)*lines*0.35;
+    emis += vec3(0.1,0.3,0.4)*(0.3+0.2*sin(t*0.5+pos.y*4.0));
+  }
+  else if(mid==40.0){ /* piante aliene */
+    alb = vec3(0.08,0.18,0.10);
+    gloss = 0.35;
+    float vein = smoothstep(0.04,0.0,abs(fract(pos.y*12.0+pos.z*8.0)-0.5)-0.44);
+    float pulse = 0.55+0.45*sin(t*1.8+pos.y*6.0);
+    emis += mix(vec3(0.25,0.9,0.45), vec3(0.7,0.25,1.0), vein)*pulse*0.55;
+    emis += vec3(0.4,0.85,0.55)*pow(fres,2.0)*0.4;
+  }
+  else if(mid==41.0){ /* armi */
+    alb = vec3(0.12,0.13,0.15);
+    gloss = 0.75;
+    emis += vec3(0.3,0.55,0.75)*pow(fres,3.0)*0.25;
+    float edge = pow(fres, 4.0);
+    emis += vec3(0.15,0.7,1.0)*edge*0.35;
+  }
+  else if(mid==42.0){ /* tech gear */
+    alb = vec3(0.05,0.06,0.08);
+    gloss = 0.4;
+    float panel = step(0.82,fract(pos.y*20.0+pos.z*12.0));
+    emis += vec3(0.2,0.7,1.0)*panel*0.55;
+    emis += vec3(0.35,0.55,1.0)*(0.25+0.2*sin(t*3.0+pos.z*8.0));
   }
 
   /* ----- illuminazione ----- */
   float ao = calcAO(pos,n);
   vec3 col = vec3(0.0);
 
-  /* luce dalla finestra (città, cielo diurno freddo) */
+  /* luce dalla finestra */
   vec3 Lw = normalize(vec3(0.12,0.35,-1.0));
-  float sh = softShadow(pos+n*0.02, Lw);
-  col += alb * max(dot(n,Lw),0.0) * sh * vec3(0.75,0.85,1.05) * 2.4;
+  float ndl = max(dot(n,Lw),0.0);
+  float sh = ndl < 0.05 ? 0.0 : softShadow(pos+n*0.02, Lw);
+  col += alb * ndl * sh * vec3(0.75,0.85,1.05) * 2.4;
 
   /* ambiente */
   col += alb * (0.45+0.35*n.y) * vec3(0.30,0.30,0.42) * ao;
-  col += alb * max(-n.z,0.0) * vec3(0.30,0.32,0.50) * ao;       /* bagliore città */
+  col += alb * max(-n.z,0.0) * vec3(0.30,0.32,0.50) * ao;
 
-  /* luci puntiformi: neon + accenti caldi */
+  /* luci puntiformi (4) */
   {
-    vec3 lps[6];
-    vec3 lcs[6];
+    vec3 lps[4];
+    vec3 lcs[4];
     lps[0]=vec3(-1.9,3.1,-0.5); lcs[0]=vec3(0.55,0.70,1.0)*2.4;
     lps[1]=vec3( 1.9,3.1,-0.5); lcs[1]=vec3(0.55,0.70,1.0)*2.4;
     lps[2]=vec3( 0.0,0.70,1.40); lcs[2]=vec3(0.6,0.3,1.0)*1.1;
-    lps[3]=vec3(TAB_C.x,TAB_C.y+0.1,TAB_C.z+0.1); lcs[3]=vec3(0.45,0.40,1.0)*0.7;
-    lps[4]=vec3(-1.55,1.00,0.55); lcs[4]=vec3(1.0,0.55,0.22)*0.9;   /* lampada calda scrivania */
-    lps[5]=vec3( 3.3,1.55,-2.6);  lcs[5]=vec3(1.0,0.60,0.28)*1.3;   /* luce calda zona letto */
-    for(int i=0;i<6;i++){
+    lps[3]=vec3(-1.55,1.00,0.55); lcs[3]=vec3(1.0,0.55,0.22)*0.9;
+    for(int i=0;i<4;i++){
       vec3 ld = lps[i]-pos;
       float dist = length(ld); ld/=dist;
       float att = 1.0/(1.0+dist*dist*1.1);
@@ -702,10 +1199,10 @@ void main(){
     float tw = (WIN_C.z-ro.z)/rd.z;
     vec3 wp = ro+rd*tw;
     vec2 wuv = (wp.xy-WIN_C.xy)/WIN_B;
-    float streak = smoothstep(0.35,0.0,abs(wuv.x-wuv.y*0.6+0.3))*0.05
-                 + smoothstep(0.25,0.0,abs(wuv.x-wuv.y*0.6-0.55))*0.03;
-    col += vec3(0.5,0.4,1.0)*streak;
-    col *= 1.0-0.10*length(wuv*wuv);
+    float streak = smoothstep(0.35,0.0,abs(wuv.x-wuv.y*0.6+0.3))*0.025
+                 + smoothstep(0.25,0.0,abs(wuv.x-wuv.y*0.6-0.55))*0.015;
+    col += vec3(0.45,0.55,0.85)*streak;
+    col *= 1.0-0.06*length(wuv*wuv);
   } else {
     vec3 pos = ro+rd*hit.x;
     col = shade(pos,rd,hit.y);

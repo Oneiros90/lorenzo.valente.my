@@ -76,9 +76,47 @@ export function lookBasis(ro: Vec3, target: Vec3): { fw: Vec3; rt: Vec3; up: Vec
   return { fw, rt, up };
 }
 
-export function mouseLookBasis(smX: number, smY: number): { fw: Vec3; rt: Vec3; up: Vec3 } {
-  const yaw = (smX - 0.5) * 0.3;
-  const pitch = (smY - 0.5) * 0.18 - 0.1;
+function lookRange(width = typeof window !== 'undefined' ? window.innerWidth : 1024) {
+  return isDesktopViewport(width) ? cameraConfig.look.desktop : cameraConfig.look.mobile;
+}
+
+/**
+ * Cursor (0..1) → yaw/pitch.
+ * Config yawDeg/pitchDeg are desired total room coverage; pan span is
+ * coverage minus current frustum FOV so narrow screens get more look range.
+ */
+export function mouseLookAngles(
+  smX: number,
+  smY: number,
+  width = typeof window !== 'undefined' ? window.innerWidth : 1024,
+  height = typeof window !== 'undefined' ? window.innerHeight : 768
+): { yaw: number; pitch: number } {
+  const range = lookRange(width);
+  const aspect = width / Math.max(height, 1);
+  const focal = cameraConfig.desk.focal;
+
+  // Matches scene ray: uv.x ∈ [-aspect,aspect], uv.y ∈ [-1,1], rd ∝ fw*focal + uv
+  const halfHFov = Math.atan(aspect / focal);
+  const halfVFov = Math.atan(1 / focal);
+  const halfCoverH = ((range.yawDeg * Math.PI) / 180) * 0.5;
+  const halfCoverV = ((range.pitchDeg * Math.PI) / 180) * 0.5;
+  const yawHalf = Math.max(halfCoverH - halfHFov, 0.12);
+  const pitchHalf = Math.max(halfCoverV - halfVFov, 0.08);
+  const pitchBias = (range.pitchBiasDeg * Math.PI) / 180;
+
+  return {
+    yaw: lerp(-yawHalf, yawHalf, smX),
+    pitch: lerp(-pitchHalf, pitchHalf, smY) + pitchBias
+  };
+}
+
+export function mouseLookBasis(
+  smX: number,
+  smY: number,
+  width = typeof window !== 'undefined' ? window.innerWidth : 1024,
+  height = typeof window !== 'undefined' ? window.innerHeight : 768
+): { fw: Vec3; rt: Vec3; up: Vec3 } {
+  const { yaw, pitch } = mouseLookAngles(smX, smY, width, height);
   const fw: Vec3 = [
     Math.sin(yaw) * Math.cos(pitch),
     Math.sin(pitch),

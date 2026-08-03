@@ -5,7 +5,20 @@ import postFragSrc from '../shaders/post.frag.glsl?raw';
 import type { CompanyConfig, RenderTarget, SceneConfig } from './types';
 import { buildOrbUniforms } from './picking';
 
-type UniformProxy = Record<string, WebGLUniformLocation | null>;
+type UniformMap = Record<string, WebGLUniformLocation | null>;
+
+function createWebGL2(canvas: HTMLCanvasElement): WebGL2RenderingContext {
+  const tryOpts: WebGLContextAttributes[] = [
+    { antialias: true, alpha: false, powerPreference: 'high-performance' },
+    { antialias: true, alpha: false },
+    { antialias: false, alpha: false }
+  ];
+  for (const opts of tryOpts) {
+    const gl = canvas.getContext('webgl2', opts);
+    if (gl) return gl;
+  }
+  throw new Error('no webgl2');
+}
 
 export class EnceladusRenderer {
   private gl: WebGL2RenderingContext;
@@ -13,10 +26,11 @@ export class EnceladusRenderer {
   private progScene: WebGLProgram;
   private progBlur: WebGLProgram;
   private progPost: WebGLProgram;
-  private uS: UniformProxy;
-  private uB: UniformProxy;
-  private uP: UniformProxy;
+  private uS: UniformMap;
+  private uB: UniformMap;
+  private uP: UniformMap;
   private hasFloat: boolean;
+  private useSupersample: boolean;
   private sceneRT!: RenderTarget;
   private bloomA!: RenderTarget;
   private bloomB!: RenderTarget;
@@ -31,11 +45,11 @@ export class EnceladusRenderer {
     scene: SceneConfig,
     onShaderError?: (message: string) => void
   ) {
-    const gl = canvas.getContext('webgl2', { antialias: false, alpha: false });
-    if (!gl) throw new Error('no webgl2');
+    const gl = createWebGL2(canvas);
     this.gl = gl;
     this.onShaderError = onShaderError;
     this.hasFloat = !!gl.getExtension('EXT_color_buffer_float');
+    this.useSupersample = false;
     this.orbUniforms = buildOrbUniforms(companies, scene);
 
     try {
@@ -50,9 +64,34 @@ export class EnceladusRenderer {
 
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
-    this.uS = this.uniforms(this.progScene);
-    this.uB = this.uniforms(this.progBlur);
-    this.uP = this.uniforms(this.progPost);
+    this.uS = this.cacheUniforms(this.progScene, [
+      'iResolution',
+      'iTime',
+      'iMouse',
+      'uHover',
+      'uActive',
+      'uCamRo',
+      'uCamTarget',
+      'uCamFocal',
+      'uViewBias',
+      'uOrbA',
+      'uOrbB',
+      'uOrbR'
+    ]);
+    this.uB = this.cacheUniforms(this.progBlur, ['uTex', 'uDir', 'uThreshold']);
+    this.uP = this.cacheUniforms(this.progPost, [
+      'uScene',
+      'uBloom',
+      'iResolution',
+      'iTime',
+      'uFade'
+    ]);
+
+    gl.useProgram(this.progScene);
+    gl.uniform3fv(this.uS.uOrbA, this.orbUniforms.colorsA);
+    gl.uniform3fv(this.uS.uOrbB, this.orbUniforms.colorsB);
+    gl.uniform1fv(this.uS.uOrbR, this.orbUniforms.radii);
+
     this.resize(canvas, scene);
   }
 
@@ -77,18 +116,21 @@ export class EnceladusRenderer {
     return p;
   }
 
-  private uniforms(program: WebGLProgram): UniformProxy {
-    return new Proxy({} as UniformProxy, {
-      get: (_, key: string) => this.gl.getUniformLocation(program, key)
-    });
+  private cacheUniforms(program: WebGLProgram, names: string[]): UniformMap {
+    const map: UniformMap = {};
+    for (const name of names) {
+      map[name] = this.gl.getUniformLocation(program, name);
+    }
+    return map;
   }
 
-  private makeTarget(w: number, h: number): RenderTarget {
+  private makeTarget(w: number, h: number, preferFloat: boolean): RenderTarget {
     const gl = this.gl;
     const tex = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    const ifmt = this.hasFloat ? gl.RGBA16F : gl.RGBA8;
-    const type = this.hasFloat ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
+    const useFloat = preferFloat && this.hasFloat;
+    const ifmt = useFloat ? gl.RGBA16F : gl.RGBA8;
+    const type = useFloat ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
     gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, gl.RGBA, type, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -101,18 +143,37 @@ export class EnceladusRenderer {
     return { tex, fb, w, h };
   }
 
+  private deleteTarget(rt: RenderTarget | undefined): void {
+    if (!rt) return;
+    const gl = this.gl;
+    gl.deleteTexture(rt.tex);
+    gl.deleteFramebuffer(rt.fb);
+  }
+
+  private resolveRenderScale(scene: SceneConfig): number {
+    if (!this.useSupersample) return scene.renderScale;
+    return Math.max(scene.renderScale, scene.aaRenderScale);
+  }
+
   resize(canvas: HTMLCanvasElement, scene: SceneConfig): void {
+    this.useSupersample = false;
     const dpr = Math.min(window.devicePixelRatio || 1, scene.maxDpr);
-    const w = Math.floor(innerWidth * dpr * scene.renderScale);
-    const h = Math.floor(innerHeight * dpr * scene.renderScale);
+    const scale = this.resolveRenderScale(scene);
+    const w = Math.floor(innerWidth * dpr * scale);
+    const h = Math.floor(innerHeight * dpr * scale);
     if (w === this.W && h === this.H) return;
     this.W = w;
     this.H = h;
     canvas.width = Math.floor(innerWidth * dpr);
     canvas.height = Math.floor(innerHeight * dpr);
-    this.sceneRT = this.makeTarget(w, h);
-    this.bloomA = this.makeTarget(w >> 2 || 1, h >> 2 || 1);
-    this.bloomB = this.makeTarget(w >> 2 || 1, h >> 2 || 1);
+    this.deleteTarget(this.sceneRT);
+    this.deleteTarget(this.bloomA);
+    this.deleteTarget(this.bloomB);
+    this.sceneRT = this.makeTarget(w, h, true);
+    const bw = w >> 2 || 1;
+    const bh = h >> 2 || 1;
+    this.bloomA = this.makeTarget(bw, bh, false);
+    this.bloomB = this.makeTarget(bw, bh, false);
   }
 
   draw(
@@ -134,18 +195,15 @@ export class EnceladusRenderer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneRT.fb);
     gl.viewport(0, 0, this.W, this.H);
     gl.useProgram(this.progScene);
-    gl.uniform2f(this.uS.iResolution!, this.W, this.H);
-    gl.uniform1f(this.uS.iTime!, t);
-    gl.uniform2f(this.uS.iMouse!, smX, smY);
-    gl.uniform1f(this.uS.uHover!, hover);
-    gl.uniform1f(this.uS.uActive!, active);
-    gl.uniform3f(this.uS.uCamRo!, camRo[0], camRo[1], camRo[2]);
-    gl.uniform3f(this.uS.uCamTarget!, camTarget[0], camTarget[1], camTarget[2]);
-    gl.uniform1f(this.uS.uCamFocal!, camFocal);
-    gl.uniform1f(this.uS.uViewBias!, viewBias);
-    gl.uniform3fv(this.uS.uOrbA!, this.orbUniforms.colorsA);
-    gl.uniform3fv(this.uS.uOrbB!, this.orbUniforms.colorsB);
-    gl.uniform1fv(this.uS.uOrbR!, this.orbUniforms.radii);
+    gl.uniform2f(this.uS.iResolution, this.W, this.H);
+    gl.uniform1f(this.uS.iTime, t);
+    gl.uniform2f(this.uS.iMouse, smX, smY);
+    gl.uniform1f(this.uS.uHover, hover);
+    gl.uniform1f(this.uS.uActive, active);
+    gl.uniform3f(this.uS.uCamRo, camRo[0], camRo[1], camRo[2]);
+    gl.uniform3f(this.uS.uCamTarget, camTarget[0], camTarget[1], camTarget[2]);
+    gl.uniform1f(this.uS.uCamFocal, camFocal);
+    gl.uniform1f(this.uS.uViewBias, viewBias);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.useProgram(this.progBlur);
@@ -153,16 +211,16 @@ export class EnceladusRenderer {
     gl.viewport(0, 0, this.bloomA.w, this.bloomA.h);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.sceneRT.tex);
-    gl.uniform1i(this.uB.uTex!, 0);
-    gl.uniform2f(this.uB.uDir!, 1, 0);
-    gl.uniform1f(this.uB.uThreshold!, this.hasFloat ? 1.0 : 0.75);
+    gl.uniform1i(this.uB.uTex, 0);
+    gl.uniform2f(this.uB.uDir, 1, 0);
+    gl.uniform1f(this.uB.uThreshold, this.hasFloat ? 1.0 : 0.75);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.bloomB.fb);
     gl.viewport(0, 0, this.bloomB.w, this.bloomB.h);
     gl.bindTexture(gl.TEXTURE_2D, this.bloomA.tex);
-    gl.uniform2f(this.uB.uDir!, 0, 1);
-    gl.uniform1f(this.uB.uThreshold!, 0.0);
+    gl.uniform2f(this.uB.uDir, 0, 1);
+    gl.uniform1f(this.uB.uThreshold, 0.0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -170,14 +228,14 @@ export class EnceladusRenderer {
     gl.useProgram(this.progPost);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.sceneRT.tex);
-    gl.uniform1i(this.uP.uScene!, 0);
+    gl.uniform1i(this.uP.uScene, 0);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.bloomB.tex);
-    gl.uniform1i(this.uP.uBloom!, 1);
-    gl.uniform2f(this.uP.iResolution!, canvas.width, canvas.height);
-    gl.uniform1f(this.uP.iTime!, t);
+    gl.uniform1i(this.uP.uBloom, 1);
+    gl.uniform2f(this.uP.iResolution, canvas.width, canvas.height);
+    gl.uniform1f(this.uP.iTime, t);
     gl.uniform1f(
-      this.uP.uFade!,
+      this.uP.uFade,
       Math.min(1, Math.max(0, (t - scene.fadeDelaySeconds) / scene.fadeInSeconds))
     );
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -185,6 +243,9 @@ export class EnceladusRenderer {
 
   destroy(): void {
     const gl = this.gl;
+    this.deleteTarget(this.sceneRT);
+    this.deleteTarget(this.bloomA);
+    this.deleteTarget(this.bloomB);
     gl.deleteProgram(this.progScene);
     gl.deleteProgram(this.progBlur);
     gl.deleteProgram(this.progPost);
