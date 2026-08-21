@@ -6,9 +6,11 @@ declare module '*.glsl?raw' {
   export default content;
 }
 
-declare module '$lib/config/companies.json' {
-  import type { CompanyConfig } from '$lib/webgl/types';
-  const value: CompanyConfig[];
+declare module 'virtual:cv-profile' {
+  import type { BioConfig, CompanyConfig } from '$lib/webgl/types';
+  export const bio: BioConfig;
+  export const companies: CompanyConfig[];
+  const value: { bio: BioConfig; companies: CompanyConfig[] };
   export default value;
 }
 
@@ -17,9 +19,20 @@ declare module '$lib/config/github.json' {
   export default value;
 }
 
-declare module '$lib/config/bio.json' {
-  import type { BioConfig } from '$lib/webgl/types';
-  const value: BioConfig;
+declare module '$lib/config/socials.json' {
+  import type { SocialConfig } from '$lib/webgl/types';
+  const value: SocialConfig[];
+  export default value;
+}
+
+declare module '$lib/config/cv.json' {
+  const value: {
+    url: string;
+    archiveId: string;
+    status: string;
+    maxCompanies: number;
+    colors?: Record<string, { colorA: [number, number, number]; colorB: [number, number, number] }>;
+  };
   export default value;
 }
 

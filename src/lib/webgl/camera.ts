@@ -1,5 +1,6 @@
 import cameraConfig from '../config/camera.json';
 import { orbPosJS, orbRadius } from './orbs';
+import { companyIndexFromPick, isCompanyPick } from './picks';
 import type { CompanyConfig, PickId, SceneConfig, Vec3 } from './types';
 
 export interface CameraPose {
@@ -33,12 +34,12 @@ export function getFocusPose(
 ): CameraPose | null {
   if (id === 0) return null;
 
-  if (id >= 4 && id <= 7) {
-    const i = id - 4;
+  if (isCompanyPick(id, companies.length)) {
+    const i = companyIndexFromPick(id);
     const company = companies[i];
     if (!company) return null;
     const r = orbRadius(company.years, scene);
-    const center = orbPosJS(i, time, r);
+    const center = orbPosJS(i, time, r, companies.length);
     const off = cameraConfig.orb.offset;
     return {
       ro: [center[0] + off[0], center[1] + off[1], center[2] + off[2]],

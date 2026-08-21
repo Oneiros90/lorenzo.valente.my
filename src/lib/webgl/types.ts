@@ -5,6 +5,10 @@ export interface CompanyConfig {
   years: number;
   colorA: Vec3;
   colorB: Vec3;
+  name: string;
+  role: string;
+  period: string;
+  description: string;
 }
 
 export interface ProjectConfig {
@@ -33,6 +37,9 @@ export interface GithubProfile {
 export interface BioConfig {
   archiveId: string;
   status: string;
+  name: string;
+  specialization: string;
+  description: string;
 }
 
 export type ChessResult = 'win' | 'draw' | 'loss';
@@ -109,4 +116,5 @@ export interface OrbUniforms {
   colorsA: Float32Array;
   colorsB: Float32Array;
   radii: Float32Array;
+  count: number;
 }

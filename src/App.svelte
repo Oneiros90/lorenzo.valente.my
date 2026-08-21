@@ -7,8 +7,7 @@
   import ChessPanel from '$lib/components/panels/ChessPanel.svelte';
   import ProjectsPanel from '$lib/components/panels/ProjectsPanel.svelte';
   import CompanyPanel from '$lib/components/panels/CompanyPanel.svelte';
-  import companies from '$lib/config/companies.json';
-  import bio from '$lib/config/bio.json';
+  import { bio, companies } from 'virtual:cv-profile';
   import scene from '$lib/config/scene.json';
   import socials from '$lib/config/socials.json';
   import { EMPTY_CHESS, fetchChessStats } from '$lib/chess';
@@ -16,6 +15,7 @@
   import { cameraConfig, isDesktopViewport } from '$lib/webgl/camera';
   import { getDefaultLocale, getLocaleData, type Locale, type LocaleData } from '$lib/i18n';
   import { isSocialPick, socialIndexFromPick } from '$lib/webgl/socials';
+  import { companyIndexFromPick, isCompanyPick } from '$lib/webgl/picks';
   import type { GithubProfile, PickId, ProjectConfig } from '$lib/webgl/types';
 
   let locale: Locale = $state(getDefaultLocale());
@@ -36,7 +36,7 @@
   let clock = $state('');
   let desktop = $state(typeof window !== 'undefined' ? isDesktopViewport() : true);
 
-  const companyIndex = $derived(active >= 4 && active <= 7 ? active - 4 : 0);
+  const companyIndex = $derived(isCompanyPick(active, companies.length) ? companyIndexFromPick(active) : 0);
   const panelOpen = $derived(active !== 0 && !isSocialPick(active));
   const focusCamera = $derived(panelOpen && desktop);
   const focusMode = $derived(panelOpen && desktop);
@@ -174,7 +174,7 @@
     onclose={onClose}
   />
   <CompanyPanel
-    open={active >= 4 && active <= 7}
+    open={isCompanyPick(active, companies.length)}
     {companyIndex}
     {strings}
     {companies}

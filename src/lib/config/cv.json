@@ -1,0 +1,28 @@
+{
+  "url": "https://dl.dropboxusercontent.com/scl/fi/u7da710482r8jhbvg78hc/Lorenzo-Valente-CV-English.pdf?rlkey=yj557vvpvzyk4162b2y19aonj&dl=1",
+  "archiveId": "2308-LV",
+  "status": "active",
+  "maxCompanies": 8,
+  "colors": {
+    "arkadium": {
+      "colorA": [0.95, 0.35, 0.12],
+      "colorB": [0.15, 0.18, 0.22]
+    },
+    "tiny-bull-studios": {
+      "colorA": [0.85, 0.65, 0.15],
+      "colorB": [0.45, 0.22, 0.05]
+    },
+    "anothereality": {
+      "colorA": [0.45, 0.25, 0.95],
+      "colorB": [0.15, 0.75, 0.95]
+    },
+    "illogic": {
+      "colorA": [0.15, 0.85, 0.55],
+      "colorB": [0.05, 0.25, 0.35]
+    },
+    "unimol": {
+      "colorA": [0.2, 0.45, 0.9],
+      "colorB": [0.75, 0.15, 0.2]
+    }
+  }
+}

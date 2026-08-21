@@ -1,6 +1,7 @@
 import { lookBasis, type CameraPose } from './camera';
 import { orbPosJS, orbRadius } from './orbs';
-import { SOCIAL_ORB_RADIUS, SOCIAL_PICK_BASE, socialPosJS } from './socials';
+import { SOCIAL_ORB_RADIUS, socialPosJS } from './socials';
+import { MAX_COMPANY_ORBS, SOCIAL_PICK_BASE, companyPickId } from './picks';
 import type { CompanyConfig, PickId, SceneConfig, SocialConfig, Vec3 } from './types';
 
 export { orbPosJS, orbRadius };
@@ -160,7 +161,7 @@ export function pick(
   test(hitOctopus(ro, rd), 3);
   for (let i = 0; i < companies.length; i++) {
     const r = orbRadius(companies[i].years, scene);
-    test(hitSphere(ro, rd, orbPosJS(i, time, r), r), (4 + i) as PickId);
+    test(hitSphere(ro, rd, orbPosJS(i, time, r, companies.length), r), companyPickId(i) as PickId);
   }
   for (let i = 0; i < socials.length; i++) {
     test(hitSphere(ro, rd, socialPosJS(i, time), SOCIAL_ORB_RADIUS), SOCIAL_PICK_BASE + i);
@@ -169,9 +170,14 @@ export function pick(
 }
 
 export function buildOrbUniforms(companies: CompanyConfig[], scene: SceneConfig) {
-  return {
-    colorsA: new Float32Array(companies.flatMap((c) => c.colorA)),
-    colorsB: new Float32Array(companies.flatMap((c) => c.colorB)),
-    radii: new Float32Array(companies.map((c) => orbRadius(c.years, scene)))
-  };
+  const colorsA = new Float32Array(MAX_COMPANY_ORBS * 3);
+  const colorsB = new Float32Array(MAX_COMPANY_ORBS * 3);
+  const radii = new Float32Array(MAX_COMPANY_ORBS);
+  const n = Math.min(companies.length, MAX_COMPANY_ORBS);
+  for (let i = 0; i < n; i++) {
+    colorsA.set(companies[i].colorA, i * 3);
+    colorsB.set(companies[i].colorB, i * 3);
+    radii[i] = orbRadius(companies[i].years, scene);
+  }
+  return { colorsA, colorsB, radii, count: n };
 }

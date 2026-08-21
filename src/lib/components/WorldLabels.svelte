@@ -65,8 +65,8 @@
     for (let i = 0; i < companies.length; i++) {
       const c = companies[i];
       const r = orbRadius(c.years, scene);
-      const name = strings.companies[c.id as keyof typeof strings.companies]?.name ?? c.id;
-      push(`company-${c.id}`, name, above(orbPosJS(i, time, r), r + 0.06));
+      const name = c.name;
+      push(`company-${c.id}`, name, above(orbPosJS(i, time, r, companies.length), r + 0.06));
     }
 
     for (let i = 0; i < socials.length; i++) {

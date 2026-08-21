@@ -76,7 +76,8 @@ export class EnceladusRenderer {
       'uViewBias',
       'uOrbA',
       'uOrbB',
-      'uOrbR'
+      'uOrbR',
+      'uOrbCount'
     ]);
     this.uB = this.cacheUniforms(this.progBlur, ['uTex', 'uDir', 'uThreshold']);
     this.uP = this.cacheUniforms(this.progPost, [
@@ -91,6 +92,7 @@ export class EnceladusRenderer {
     gl.uniform3fv(this.uS.uOrbA, this.orbUniforms.colorsA);
     gl.uniform3fv(this.uS.uOrbB, this.orbUniforms.colorsB);
     gl.uniform1fv(this.uS.uOrbR, this.orbUniforms.radii);
+    gl.uniform1f(this.uS.uOrbCount, this.orbUniforms.count);
 
     this.resize(canvas, scene);
   }

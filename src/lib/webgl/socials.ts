@@ -1,4 +1,5 @@
 import type { Vec3 } from './types';
+import { SOCIAL_PICK_BASE } from './picks';
 
 /**
  * Right-wall social orbs — MUST sit in front of shelves toward room (-X).
@@ -15,8 +16,8 @@ const SOCIAL_BASE: Vec3[] = [
   [3.18, 1.04, -0.2]
 ];
 
+export { SOCIAL_PICK_BASE } from './picks';
 export const SOCIAL_ORB_RADIUS = 0.09;
-export const SOCIAL_PICK_BASE = 8;
 
 export function socialPosJS(i: number, time: number): Vec3 {
   const b = SOCIAL_BASE[i];

@@ -10,9 +10,10 @@ uniform vec3  uCamRo;
 uniform vec3  uCamTarget;
 uniform float uCamFocal;
 uniform float uViewBias;
-uniform vec3  uOrbA[4];
-uniform vec3  uOrbB[4];
-uniform float uOrbR[4];
+uniform vec3  uOrbA[8];
+uniform vec3  uOrbB[8];
+uniform float uOrbR[8];
+uniform float uOrbCount;
 
 /* ---------- utility ---------- */
 #define PI 3.14159265
@@ -50,7 +51,8 @@ vec3 octToLocal(vec3 q){
 }
 vec3 orbPos(int i){
   float fi = float(i);
-  float z = 1.18 - fi*0.16;
+  float n = max(uOrbCount, 1.0);
+  float z = 1.18 - (n <= 1.0 ? 0.0 : (fi / (n - 1.0)) * 0.48);
   float xOff = (mod(fi, 2.0) < 0.5) ? -0.05 : 0.25;
   float r = uOrbR[i];
   return vec3(-0.22 + xOff, 0.795 + r + 0.015*sin(iTime*1.3+fi*1.9), z);
@@ -169,10 +171,11 @@ vec2 map(vec3 p){
   }
 
   /* sfere olografiche aziende (fluttuanti su piedistalli; LOD: pedestallo solo da vicino) */
-  for(int i=0;i<4;i++){
-    vec3 op = orbPos(i);
+  for(int i=0;i<8;i++){
     float r = uOrbR[i];
-    res = opU(res, vec2(sdSphere(p-op, r), 20.0+float(i)));
+    if(r <= 0.0) continue;
+    vec3 op = orbPos(i);
+    res = opU(res, vec2(sdSphere(p-op, r), 50.0+float(i)));
     if(length(p-vec3(op.x,0.80,op.z)) < 0.28){
       res = opU(res, vec2(sdCylinder(p-vec3(op.x,0.795,op.z), 0.010,0.035), 5.0));
       res = opU(res, vec2(sdCylinder(p-vec3(op.x,0.806,op.z), 0.003,0.030), 14.0));
@@ -894,8 +897,8 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
     }
     return c;
   }
-  if(mid>=20.0 && mid<24.0){
-    int oi = int(mid-20.0);
+  if(mid>=50.0 && mid<58.0){
+    int oi = int(mid-50.0);
     vec3 ca = uOrbA[oi], cb = uOrbB[oi];
     vec3 op = orbPos(oi);
     vec3 lp = pos-op;

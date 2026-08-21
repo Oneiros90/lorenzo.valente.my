@@ -91,36 +91,7 @@
     }
   },
   "bio": {
-    "name": "Lorenzo Valente",
-    "specialization": "Full Stack Developer",
-    "base": "Enceladus Prime · Modulo 7",
-    "description": "Appassionato di tecnologia, design e intelligenza artificiale. Creo esperienze digitali immersive e funzionali, sempre alla ricerca di nuove sfide in ambienti innovativi — anche a 1,3 miliardi di km dal Sole."
-  },
-  "companies": {
-    "novatech": {
-      "name": "NovaTech Industries",
-      "role": "Full Stack Developer",
-      "period": "2022 — 2024",
-      "description": "Sviluppo di piattaforme web ad alta scalabilità, architetture microservizi e interfacce in tempo reale per il settore aerospaziale."
-    },
-    "helios": {
-      "name": "Helios Dynamics",
-      "role": "Backend Engineer",
-      "period": "2020 — 2022",
-      "description": "Progettazione di API distribuite, pipeline dati e infrastruttura cloud per sistemi di propulsione ionica."
-    },
-    "verdant": {
-      "name": "Verdant Labs",
-      "role": "Frontend Developer",
-      "period": "2018 — 2020",
-      "description": "Creazione di design system e applicazioni SPA con focus su accessibilità, performance e animazioni fluide."
-    },
-    "aurum": {
-      "name": "Aurum Syndicate",
-      "role": "Tech Lead",
-      "period": "2024 — presente",
-      "description": "Coordinamento team cross-funzionali, revisione architetturale e delivery di prodotti digitali mission-critical."
-    }
+    "base": "Enceladus Prime · Modulo 7"
   },
   "errors": {
     "webgl": "Il tuo browser non supporta WebGL2.\nApri questa pagina con un browser recente (Chrome, Firefox, Safari 16+).",

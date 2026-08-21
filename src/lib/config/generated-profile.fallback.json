@@ -1,0 +1,101 @@
+{
+  "bio": {
+    "archiveId": "2308-LV",
+    "status": "active",
+    "name": "Lorenzo Valente",
+    "specialization": "Software Engineer",
+    "description": "Extensive background in Software Design and Development, including experience in Game Development, AR and VR, 3D Math and Real-time Physics, Scientific Visualization, Full-stack Web Design, Network Coding, Neural Networks and Evolutionary Algorithms Design. My personal interests include technology, design, web, movies, music, videogames, cooking, traveling"
+  },
+  "companies": [
+    {
+      "id": "arkadium",
+      "years": 1,
+      "colorA": [
+        0.95,
+        0.35,
+        0.12
+      ],
+      "colorB": [
+        0.15,
+        0.18,
+        0.22
+      ],
+      "name": "Arkadium",
+      "role": "Senior Game Developer",
+      "period": "2026 — present",
+      "description": "Development of web based games"
+    },
+    {
+      "id": "tiny-bull-studios",
+      "years": 5,
+      "colorA": [
+        0.85,
+        0.65,
+        0.15
+      ],
+      "colorB": [
+        0.45,
+        0.22,
+        0.05
+      ],
+      "name": "Tiny Bull Studios",
+      "role": "Senior Game Developer",
+      "period": "2021 — 2026",
+      "description": "Worked on The Lonesome Guild, an action RPG game published by Don't Nod Entertainment and released on PC, PS5 and Xbox. Worked on Gamification and Industry 4.0 business projects Experience on Unity, UI Toolkit, DOTS, Odin, WebGL."
+    },
+    {
+      "id": "anothereality",
+      "years": 2,
+      "colorA": [
+        0.45,
+        0.25,
+        0.95
+      ],
+      "colorB": [
+        0.15,
+        0.75,
+        0.95
+      ],
+      "name": "AnotheReality",
+      "role": "XR Software Developer",
+      "period": "2019 — 2021",
+      "description": "Worked on Unity and Unreal Engine based projects for development of immersive XR business solutions, VR and Mobile videogames Experience on Oculus Quest/Rift, HTC Vive, Kinect devices Close cooperation with Microsoft, Luxottica, MSC, Trenitalia, ENI and Universal Music Group"
+    },
+    {
+      "id": "illogic",
+      "years": 3,
+      "colorA": [
+        0.15,
+        0.85,
+        0.55
+      ],
+      "colorB": [
+        0.05,
+        0.25,
+        0.35
+      ],
+      "name": "Illogic",
+      "role": "VR and AR Analyst Programmer",
+      "period": "2016 — 2019",
+      "description": "Worked on a proprietary Virtual Training platform based on open-source C++ technologies, OpenSceneGraph, UWP, OpenVR Design of Mixed Reality and Virtual Reality user interfaces Actively collaborated with the A4BLUE European project"
+    },
+    {
+      "id": "unimol",
+      "years": 3,
+      "colorA": [
+        0.2,
+        0.45,
+        0.9
+      ],
+      "colorB": [
+        0.75,
+        0.15,
+        0.2
+      ],
+      "name": "UNIMOL",
+      "role": "Full-stack Web Designer",
+      "period": "2013 — 2016",
+      "description": "Creation of the State Forestry Service LifeMIPP project website Full Client-Side and Server-Side design and production with HTML5, Javascript, Google Maps API and JSP/Servlet"
+    }
+  ]
+}
