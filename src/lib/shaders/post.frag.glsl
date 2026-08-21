@@ -21,7 +21,7 @@ void main(){
 
   /* bloom */
   vec3 bloom = texture(uBloom, uv).rgb;
-  col += bloom*1.25;
+  col += bloom*0.95;
 
   /* pulviscolo fluttuante */
   for(int i=0;i<3;i++){
@@ -33,22 +33,22 @@ void main(){
     vec2 o=hash22(id+fi*17.0)-0.5;
     float d=length(f-o*0.8);
     float vis=step(0.82,hash21(id+fi*31.0));
-    col += vec3(0.5,0.55,1.0)*smoothstep(0.025,0.0,d)*vis*(0.04+0.04*sin(t*1.5+hash21(id)*20.0));
+    col += vec3(0.42,0.48,0.85)*smoothstep(0.025,0.0,d)*vis*(0.03+0.03*sin(t*1.5+hash21(id)*20.0));
   }
 
-  /* tonemap ACES */
-  col = aces(col*1.30);
+  /* tonemap ACES: notturno ma con i materiali ancora leggibili */
+  col = aces(col*1.18);
 
-  /* grade neutro con lieve tinta fredda nelle ombre */
-  col = pow(col, vec3(0.96,0.97,0.94));
-  col += vec3(0.008,0.010,0.020)*(1.0-col);
+  /* grade: ombre navy, mai nero puro */
+  col = pow(col, vec3(1.05,1.04,1.00));
+  col += vec3(0.008,0.010,0.018)*(1.0-col);
 
   /* scanline + flicker */
   col *= 0.97+0.03*sin(gl_FragCoord.y*1.7);
   col *= 0.99+0.01*sin(t*60.0);
 
   /* vignettatura */
-  float vig = 1.0-0.45*dot(c*1.25,c*1.25);
+  float vig = 1.0-0.52*dot(c*1.25,c*1.25);
   col *= clamp(vig,0.,1.);
 
   /* grana */

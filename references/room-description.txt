@@ -1,0 +1,159 @@
+Create a high-quality real-time 3D interior mesh of a single habitat room. This is not a generic sci-fi apartment. It is Habitat Module 7 of ENCELADUS PRIME, year 2308: a lived-in colonial outpost on Enceladus, the icy moon of Saturn, with artificial gravity. One occupant, quiet night shift, no people, no UI, no holograms, no floating orbs, no screens with readable text.
+
+MOOD
+Nocturnal, cold, cinematic, slightly melancholic. Industrial-colonial, not sterile Star Trek and not grimy Alien corridors. Think a private cabin on a research station that has been inhabited for years: precise, compact, a little frostbitten near the viewport. Silence, low light, analog-future. Palette: graphite black, cold brushed steel, ice-blue, muted violet. Shadows are deep navy, never pure black voids. Surfaces should read as real materials under mixed lighting, not plastic shader balls.
+
+SCALE AND LAYOUT (meters, Y-up, right-handed)
+Interior volume approximately 7.8 m wide × 3.2 m tall × 6.8 m deep.
+- Origin at room center.
+- Floor at y = 0. Ceiling at y ≈ 3.2.
+- Left wall x ≈ −3.7. Right wall x ≈ +3.7.
+- Back wall (behind the occupant) z ≈ +3.0.
+- Viewport wall z ≈ −3.8.
+The default camera sits at (0.0, 1.26, 2.1) looking toward (0.0, 1.0, 0.5), a wide cinematic view of the desk with the panoramic viewport beyond. Model the room so that this camera sees a complete, believable interior with no missing backsides, floating walls, or open voids except the window hole.
+
+ARCHITECTURE
+A sealed rectangular habitat module. Walls, floor, and ceiling are plated metal / composite panels with visible seams, recessed joints, sparse rivets, and faint embedded conduit lines. Not glossy white. Not concrete bunker.
+
+FLOOR
+Dark graphite tiles (albedo ~0.07), slightly reflective. Hexagonal frost micro-pattern in the finish. Thin ice-blue micro-seams between plates, barely emissive. A slightly lighter central walkway strip along x ≈ 0, z from about −2 to +2. Near the window, a faint frost bloom as if cold is leaking through the viewport.
+
+CEILING
+Dark paneled ceiling with a grid of service panels. Two long recessed linear neon troughs running in Z, roughly at x = ±1.9, dim ice-blue/white, not blinding. Center-forward: a rectangular HVAC unit with a dark grilled face. Two cylindrical utility conduits hugging the ceiling toward the sides. Keep lighting fixtures physically modeled, not just emissive planes.
+
+WALLS
+Cool grey-blue plated metal (albedo ~0.09–0.12), low gloss. Vertical and horizontal panel seams. Sparse structural rivets along seams. Dim cyan conduit ticks, almost static, very subtle. Frost / cold patina increases toward the window wall. Left wall behind the shelves: colder, faintly ribbed. Right wall: similar but cleaner. Back wall: a service door with dim seal lights in the frame, two vertical bulkhead pillars, a dark recessed status panel (dead/off, scanline grille texture only, no readable UI), and a small ID plate. Around the viewport: a cold ice-blue halo in the metal, as if the window is the coldest object in the room.
+
+VIEWPORT (the window)
+A wide panoramic habitat viewport in the −Z wall, not a residential window.
+- Center ≈ (0.0, 1.80, −3.80)
+- Opening ≈ 5.9 m wide × 2.24 m tall
+Thin dark-metal bezel, slightly proud of the wall. Industrial L-shaped corner brackets at the four corners, like a spacecraft pressure window. The opening must be a real hole in the wall geometry (or a separate thin glass plane with high transmission). Do not put a painted sky on the interior wall.
+
+WHAT IS OUTSIDE THE WINDOW
+The viewport looks out from Enceladus at night. Composition of the view:
+- Lower ~40% of the frame: icy ground and a low city skyline sitting on the horizon. Do not fill the window with skyscrapers. The city is distant and subordinate to the sky.
+- Upper ~60%: deep night sky, Saturn, stars, and an orbital station.
+
+Sky: near-black navy (not daylight blue). Sparse cold-white stars. Two faint nebula glows, one magenta-violet, one cyan, very soft.
+
+Saturn: high-left, fully inside the frame, not cropped. Ochre / cream / taupe atmospheric bands. A wide ring system with a dark Cassini-like gap. Rings must pass in front of the planet on the near half and behind it on the far half. Warm dusty ring color (pale bronze-grey), not neon.
+
+Icy surface of Enceladus below: dark glacier plains with cracked “tiger stripe” crevasses, specular highlights from Saturn, cold blue-grey ice, not snowy Earth tundra. Mid-ground: two layers of low ice ridges. Distant cryovolcanic plumes: tall, faint, bluish-white ice geysers.
+
+City on the horizon: a low saturnian colonial metropolis. Dark silhouettes of mixed tower types (boxes, stepped, tapered, twin towers), sparse skybridges, tiny windows in cyan / ice-white / magenta / violet. A few flickering holographic billboards, distant and illegible. Atmospheric fog color approximately RGB (0.08, 0.10, 0.16). Buildings must stay below Saturn; leave a clear sky corridor on the left for the planet.
+
+Orbital station: high-right, a metallic silhouette (not a glowing ring). Central hub, docking spines, solar-panel wings with panel lines, a few lit windows. Small delta-wing shuttlecraft commute between the station and the city, tiny, with short cyan or amber engine trails.
+
+If you cannot build the exterior as real distant geometry, deliver the exterior as a matching equirectangular HDRI / cubemap of this exact view, and keep the window as an open hole. Do not model a full city as high-poly mesh inside the room file.
+
+FURNITURE AND SET DRESSING (static environment only)
+
+DESK — center of the room, facing the window.
+Low, wide, dark brushed-metal desk, about 3.1 m wide, thin top (~3.5 cm) with slightly rounded edges, high gloss. Two solid dark-metal legs. A thin violet LED strip along the front edge of the desktop (the only warm-violet accent on the furniture). Keep the desktop mostly EMPTY: later interactive props will be placed on it. Allowed set dressing only:
+- Right side: a dark ceramic mug with a thin purple glowing rim.
+- Far left: a small dark cube gadget, unlit or barely pulsing, no holographic projection.
+
+BED — right side of the room, along the right wall, closer to the window than the back wall.
+Low platform bed, muted dusty grey-mauve fabric, not a hotel white duvet. One pillow toward the window. A thin ice-blue emissive outline under the bed frame, like a floating hover-pallet. Dark metal base.
+
+LEFT WALL — three floating shelves (deep, ~0.40 m), dark metal, wall brackets.
+Top shelf: compact tech gear — a small dark monitor slab (screen off or faintly cyan), a short antenna topped with a sphere, a cubic scanner, a battery cell with a cyan energy window, a folded micro-drone. Lived-in, not store display.
+Middle shelf: three alien plants in dark pots.
+  1) Bulbous fleshy plant with two tendrils and round leaves; dark green-black flesh, bioluminescent veins mixing chlorophyll green and violet.
+  2) Spiral / coiled plant on a cylindrical pot, beads of glowing tissue along a stem.
+  3) Organic crystal cluster: three uneven crystal spikes growing from a square pot, same bioluminescent material, not geological quartz.
+Bottom shelf: weapons as objects, not a gun-game rack. A long rifle (barrel + stock + sight), a compact pistol, a short energy katana with a dark hilt and a thin cyan edge on the blade. Dark gunmetal, high gloss, restrained emissive edges.
+
+RIGHT WALL — three matching but shallower floating shelves, EMPTY. No objects on them. They must stay clear.
+
+DO NOT INCLUDE (these are added later as separate interactive objects)
+- Tablet / slate on the desk
+- Chessboard and pieces
+- Octopus / octocat figure
+- Floating orbs, energy spheres, pedestals on the desk
+- Colored spheres on the right-hand shelves
+- Any hover states, labels, cursors, readable UI, logos, or holograms
+
+Leave empty clearance volumes (do not occupy these with geometry):
+- Desk left: around (−0.70, 0.83, 0.80) — ~0.45 × 0.20 × 0.35 m
+- Desk center-left: around (−0.22, 0.82, 0.90) spreading toward z = 1.18 — keep ~0.7 m of desktop clear
+- Desk center-right: around (0.58, 0.81, 0.82) — ~0.50 × 0.20 × 0.50 m
+- Desk right: around (1.12, 0.80, 1.10) — ~0.30 m radius
+- Right shelves front faces at x ≈ 3.18, y ≈ 1.04 / 1.79 / 2.54 — keep ~0.20 m in front of each shelf empty
+
+LIGHTING TO BAKE INTO MATERIALS (not a studio HDRI on the mesh)
+Primary: cold window light from −Z, color ~ (0.75, 0.85, 1.05), soft, directional, like Saturn-light through ice haze.
+Fill: two dim ceiling neons, ice-blue.
+Accent: violet LED under the front of the desk; faint amber point near the left of the desk; cyan underglow under the bed; bioluminescence from the plants; very dim wall conduits.
+Overall: underexposed, high contrast, cool. Glossy floor and desk should be able to catch window reflections.
+
+STYLE OF DETAIL
+Hard-surface for architecture and weapons. Slightly organic only for the plants. Micro-detail in materials (scuffs, frost, panel gaps, rivets), not in millions of triangles. No stylized cartoon, no photoreal Unreal cinematic with 8K unique textures. Target: premium real-time game environment, mid-poly, physically plausible materials.
+
+DELIVERABLE FOR A CUSTOM WEBGL2 SITE (not Unity, not Unreal, not Three.js yet)
+
+The destination site (“enceladus-prime”) currently renders this entire room as a raymarched SDF in a WebGL2 fragment shader (fullscreen triangle, GLSL ES 3.00). There is no mesh loader, no glTF, no Three.js. The mesh must therefore be authored so a small custom WebGL2 rasterizer (or a later glTF loader) can replace the room SDF while keeping the existing camera, picking volumes, bloom, and ACES post.
+
+COORDINATE SYSTEM — MUST MATCH THE LIVE CAMERA
+- Y-up, right-handed, 1 unit = 1 meter
+- Do not autoscale, recenter, or rotate to “Y-up from Z-up” on export; author in this space
+- Default camera (do not bake it as the only view, but use it as the hero framing):
+  eye    = (0.0, 1.26, 2.1)
+  target = (0.0, 1.00, 0.5)
+  up     = (0, 1, 0)
+  focal  = 1.55  (shader convention: rd = normalize(forward * 1.55 + uv.x * right + uv.y * up),
+                 uv.y in [-1, 1] ⇒ vertical FOV ≈ 65.6°; at 16:9, horizontal FOV ≈ 98°)
+- The site also pans the look direction up to ~150° yaw / 62° pitch, so the full interior (side shelves, bed, back wall, ceiling) must be modeled, not only the desk-facing hero shot
+- Named empty locators (glTF nodes, no mesh) at the clearance positions listed above, names:
+  loc_tablet, loc_orbs, loc_chess, loc_octocat, loc_social_0 … loc_social_6
+
+FILE FORMAT
+- Single glTF 2.0 binary: room.glb
+- Optional second file: window.env.hdr (equirectangular, 2K, the Enceladus night view) OR a cubemap
+- No USD, no FBX-only, no Blender-only packed textures
+- Do NOT use Draco compression unless noted: this repo has no Draco decoder and inlines every asset into one HTML (vite-plugin-singlefile). Uncompressed or meshopt-free GLB only
+- Target total payload: 2–6 MB. Hard ceiling ~8 MB. This site currently has almost zero art weight because the room is a shader
+
+MESH BUDGET
+- 40k–80k triangles preferred, absolute max 150k
+- Hard-surface, triangulated on export, consistent CCW winding, normals outward (into the room)
+- Tangents exported (needed for normal maps)
+- No subdivision surfaces, no nanite-style displacement, no overlapping shells
+- Named glTF nodes / mesh primitives (exact names help swapping):
+  Room_Floor, Room_Ceiling, Room_Walls, Room_WindowFrame,
+  Desk, Bed, Shelves_Left, Shelves_Right, Props_Left,
+  Ceiling_Fixtures, BackWall_Details
+- Window opening: actual geometric hole in Room_Walls. Optional child node Window_Glass as a single thin quad, alpha < 0.15, unlit or transmissive, no opaque sky painted on it
+- Exterior city/Saturn: NOT in the room mesh. HDRI/cubemap, or a separate low-poly sky dome in window_env.glb. The site can keep rendering the procedural city shader through the hole via a background pass + depth test
+
+MATERIALS (glTF 2.0 metallic-roughness)
+- PBR: baseColor, metallicRoughness (metallic + roughness packed), normal, emissive, occlusion
+- sRGB: baseColor, emissive. Linear: normal, ORM
+- One or two 2048 atlases max (1024 acceptable). No 4K. No unique UV per object at 4K
+- Emissive is mandatory for: ceiling neons, desk violet strip, bed underglow, plant veins, weapon energy edge, window-frame cold halo, wall conduit ticks. Keep emissive values in a range that still looks good after ACES tonemap (site does aces(color * 1.30) plus bloom of highlights > 1.0)
+- Floor and desk: roughness ~0.15–0.45, metallic ~0.6–0.9 (brushed metal)
+- Fabric bed: roughness high, metallic 0
+- Plants: low metallic, roughness ~0.35, strong emissive in veins
+- No clearcoat / volume / sheen extensions required (WebGL2 loader will be minimal). If used, they must degrade to base MR
+- Vertex colors only as a fallback if textures are omitted
+
+UVs AND TEXTURES
+- Single UV set, non-overlapping for the atlas (lightmap-style packing is fine)
+- Padding ≥ 8 px to survive mipmaps
+- Power-of-two
+- Prefer JPEG for albedo, PNG or packed ORM for data maps, to keep the inlined HTML small
+
+WHAT THE ENGINE WILL DO AFTER IMPORT
+The existing pipeline is:
+  1. scene pass (today: SDF raymarch) → RGBA16F target
+  2. threshold bloom + separable blur
+  3. ACES, cold shadow grade, scanlines, film grain, vignette
+So the mesh must look correct in linear HDR before tonemap: neons slightly above 1.0, walls well below 0.2, window exterior much brighter than interior walls. Do not bake the post look (scanlines, grain, ACES) into the textures.
+
+INTEGRATION HOOKS
+- Keep origin/scale exact so camera.json and the current picking AABBs still work
+- Do not put collision-only geometry in the render mesh
+- No animation required. Plants may have a static pose; idle motion will be shader/CPU later
+- WebGL2 / GLSL 300 es. No WebGPU-only features, no mesh shaders, no 32-bit float vertex colors
+- If you output a preview turntable, also output a still from the exact desk camera above, 16:9
