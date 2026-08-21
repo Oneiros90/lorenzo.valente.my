@@ -168,23 +168,23 @@ vec3 socialColorB(int i){
 
 const vec3 LGT_A[NLIGHT] = vec3[NLIGHT](
   vec3(-2.14,3.150,-3.10), vec3( 2.14,3.150,-3.10),
-  vec3(-1.52,0.695, 1.39), vec3( 1.60,0.145,-2.70), vec3(-2.86,0.672,-3.40),
+  vec3(-1.52,0.695, 1.39), vec3( 1.55,0.22,-2.40), vec3(-2.86,0.672,-3.40),
   vec3(-1.53,0.695, 1.39), vec3( 1.53,0.695, 1.39),
   vec3(-3.40,1.595,-1.58), vec3( 3.44,1.595,-1.72)
 );
 const vec3 LGT_B[NLIGHT] = vec3[NLIGHT](
   vec3(-1.62,3.150, 1.95), vec3( 1.62,3.150, 1.95),
-  vec3( 1.52,0.695, 1.39), vec3( 1.60,0.145,-0.50), vec3( 2.86,0.672,-3.40),
+  vec3( 1.52,0.695, 1.39), vec3( 1.55,0.22,-0.64), vec3( 2.86,0.672,-3.40),
   vec3(-1.53,0.695, 0.33), vec3( 1.53,0.695, 0.33),
   vec3(-3.40,1.595, 0.68), vec3( 3.44,1.595, 0.28)
 );
 const vec3 LGT_C[NLIGHT] = vec3[NLIGHT](
   vec3(0.46,0.60,0.86)*2.15, vec3(0.46,0.60,0.86)*2.15,
-  vec3(0.42,0.10,0.86)*2.35, vec3(0.12,0.48,0.86)*2.20, vec3(0.30,0.44,0.68)*0.95,
-  vec3(0.42,0.10,0.86)*1.35, vec3(0.42,0.10,0.86)*1.35,
+  vec3(0.46,0.14,0.62)*0.85, vec3(0.18,0.62,1.05)*4.20, vec3(0.30,0.44,0.68)*0.95,
+  vec3(0.42,0.10,0.86)*0.55, vec3(0.42,0.10,0.86)*0.55,
   vec3(0.11,0.36,0.66)*1.05, vec3(0.11,0.36,0.66)*0.95
 );
-const float LGT_R[NLIGHT] = float[NLIGHT](0.11,0.11,0.05,0.05,0.03,0.04,0.04,0.035,0.035);
+const float LGT_R[NLIGHT] = float[NLIGHT](0.11,0.11,0.05,0.08,0.03,0.04,0.04,0.035,0.035);
 
 vec3 segClosest(vec3 p, vec3 a, vec3 b){
   vec3 ab = b-a;
@@ -224,10 +224,13 @@ vec3 stripLighting(vec3 pos, vec3 n, float ao){
   return acc*ao;
 }
 
-/* glow delle strisce lungo un raggio: volumetrica, riflessi lucidi, vetro */
-vec3 stripGlow(vec3 ro, vec3 rd, float tmax, float k){
+/* glow delle strisce lungo un raggio: volumetrica, riflessi lucidi, vetro.
+   nlim limita quali luci (0,1 = solo plafoniere: serve al piano della scrivania
+   perché la striscia viola frontale altrimenti sporca tutto il top). */
+vec3 stripGlowN(vec3 ro, vec3 rd, float tmax, float k, int nlim){
   vec3 acc = vec3(0.0);
   for(int i=0;i<NLIGHT_MAJOR;i++){
+    if(i >= nlim) break;
     float tr;
     float d = raySegDist(ro,rd,LGT_A[i],LGT_B[i],tr);
     if(tr <= 0.02 || tr > tmax) continue;
@@ -235,6 +238,9 @@ vec3 stripGlow(vec3 ro, vec3 rd, float tmax, float k){
     acc += LGT_C[i]*g*g;
   }
   return acc;
+}
+vec3 stripGlow(vec3 ro, vec3 rd, float tmax, float k){
+  return stripGlowN(ro, rd, tmax, k, NLIGHT_MAJOR);
 }
 
 /* ---------- occupazione scacchiera ---------- */
@@ -267,8 +273,8 @@ float pieceProfile(vec2 cell){
    ID materiali:
     2 shell stanza  4 top scrivania  5 metallo scuro  6 corpo tablet
     7 schermo tablet 8 scacchiera  10/11 pezzi  12 bezel finestra
-    13 LED viola  14 LED ciano  15 tessuto letto  16 coperta
-    17 tazza  18 gadget  20 diffusore plafoniera  21 condotto
+    13 LED viola  14 LED ciano  15 materasso  16 coperta  19 cuscino
+    17 tazza  20 diffusore plafoniera  21 condotto
     22 statuetta  23 cassa  24 octocat  25 metallo mensole
     26 bulkhead  27 accento ciano  28 display  29 grigliato
     30..36 social  40 piante  41 armi  42 tech  50..57 orbs
@@ -384,16 +390,13 @@ vec2 map(vec3 p){
     float gb = bnd(p, vec3(0.0,0.45,0.85), vec3(1.82,0.60,0.82));
     if(gb < GB){
       vec3 dp = p - DESK_C;
-      res = opU(res, vec2(sdRoundBox(dp, vec3(1.55,0.035,0.55),0.02), 4.0));
-      /* gambe a T con piede a pavimento e traversa */
-      res = opU(res, vec2(sdBox(vec3(abs(dp.x)-1.35,dp.y+0.42,dp.z), vec3(0.05,0.38,0.45)), 5.0));
-      res = opU(res, vec2(sdRoundBox(vec3(abs(dp.x)-1.35,dp.y+0.730,dp.z), vec3(0.17,0.020,0.50), 0.01), 5.0));
-      res = opU(res, vec2(sdBox(dp - vec3(0.0,-0.50,-0.12), vec3(1.31,0.040,0.050)), 5.0));
-      /* LED perimetrale + piastra sottopiano che lo scherma dall'alto */
-      float ring = abs(sdRect2(dp.xz, vec2(1.525,0.525))) - 0.010;
-      ring = max(ring, abs(dp.y + 0.055) - 0.014);
-      res = opU(res, vec2(ring, 13.0));
-      res = opU(res, vec2(sdRoundBox(dp - vec3(0.,-0.085,0.), vec3(1.44,0.020,0.44),0.01), 5.0));
+      res = opU(res, vec2(sdRoundBox(dp, vec3(1.55,0.038,0.55),0.012), 4.0));
+      /* due piedistalli pieni, come nel still */
+      res = opU(res, vec2(sdRoundBox(vec3(abs(dp.x)-1.12, dp.y+0.395, dp.z+0.04), vec3(0.22,0.355,0.38), 0.02), 5.0));
+      /* LED rientrato sotto il bordo anteriore: linea netta, niente bleed sul piano */
+      float led = max(abs(dp.z - 0.552) - 0.006, abs(dp.x) - 1.46);
+      led = max(led, abs(dp.y + 0.046) - 0.007);
+      res = opU(res, vec2(led, 13.0));
       /* canalina cavi e matassa che scende dietro il piano */
       res = opU(res, vec2(sdBox(dp - vec3(0.0,-0.145,-0.36), vec3(1.20,0.038,0.055)), 26.0));
       res = opU(res, vec2(sdCapsule(p, vec3(0.92,0.585,0.50), vec3(1.02,0.30,0.44), 0.016), 5.0));
@@ -463,14 +466,13 @@ vec2 map(vec3 p){
         }
       }
 
-      /* tazza con manico e gadget cubico */
+      /* tazza con manico */
       vec3 mp = p - vec3(1.18,0.85,0.60);
       float mug = sdCylinder(mp, 0.065, 0.045);
       mug = max(mug, -sdCylinder(mp - vec3(0.,0.020,0.), 0.062, 0.036));
       float handle = sdTorus(vec3(mp.x-0.042, mp.z, mp.y), vec2(0.032,0.008));
       handle = max(handle, -(0.042 - mp.x));
       res = opU(res, vec2(min(mug, handle), 17.0));
-      res = opU(res, vec2(sdRoundBox(p-vec3(-1.28,0.84,0.55), vec3(0.042,0.042,0.042), 0.006), 18.0));
       }
     } else res.x = min(res.x, gb);
   }
@@ -480,20 +482,25 @@ vec2 map(vec3 p){
     float gb = max(1.58 - p.x, abs(p.z + 1.64) - 1.16);
     if(gb < GB){
       vec3 ep = p - BED_C;
-      /* base rientrante: il LED sporge sotto lo sbalzo del materasso */
-      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,-0.225,0.), vec3(0.86,0.105,1.01),0.02), 5.0));
-      float bring = abs(sdRect2(ep.xz, vec2(0.905,1.055))) - 0.013;
-      bring = max(bring, abs(ep.y + 0.195) - 0.016);
+      /* pedana bassa, quasi nascosta dalle lenzuola */
+      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,-0.275,0.), vec3(0.78,0.055,0.94),0.015), 5.0));
+      /* LED hover-pallet a filo pavimento */
+      float bring = abs(sdRect2(ep.xz, vec2(0.90,1.04))) - 0.022;
+      bring = max(bring, abs(ep.y + 0.332) - 0.018);
       res = opU(res, vec2(bring, 14.0));
-      res = opU(res, vec2(sdRoundBox(ep, vec3(0.97,0.125,1.12),0.05), 15.0));
-      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,0.115,0.42), vec3(0.96,0.048,0.52),0.05), 16.0));
-      res = opU(res, vec2(sdRoundBox(ep-vec3(-0.42,0.175,-0.83), vec3(0.40,0.055,0.20),0.055), 16.0));
-      res = opU(res, vec2(sdRoundBox(ep-vec3( 0.42,0.175,-0.86), vec3(0.40,0.050,0.19),0.050), 16.0));
-      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,0.10,-1.12), vec3(0.96,0.24,0.05),0.03), 26.0));
-      res = opU(res, vec2(sdBox(ep-vec3(0.,0.32,-1.06), vec3(0.90,0.008,0.010)), 14.0));
-      /* piedini e cassetto sotto la pedana */
-      res = opU(res, vec2(sdBox(vec3(abs(ep.x)-0.70, ep.y+0.325, abs(ep.z)-0.82), vec3(0.06,0.010,0.06)), 5.0));
-      res = opU(res, vec2(sdRoundBox(ep-vec3(-0.87,-0.225,0.30), vec3(0.012,0.070,0.42),0.008), 26.0));
+      /* LED a filo della coperta, sulla faccia verso la stanza */
+      float sideL = max(abs(ep.x + 0.99) - 0.018, abs(ep.y + 0.12) - 0.032);
+      sideL = max(sideL, abs(ep.z - 0.18) - 0.78);
+      float sideF = max(abs(ep.z - 0.96) - 0.018, abs(ep.y + 0.12) - 0.032);
+      sideF = max(sideF, abs(ep.x) - 0.98);
+      res = opU(res, vec2(min(sideL, sideF), 14.0));
+      /* materasso plum, poco visibile sotto la coperta */
+      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,-0.02,0.), vec3(0.94,0.14,1.08),0.05), 15.0));
+      /* coperta taupe che ricade sui lati: è il volume che la camera vede */
+      res = opU(res, vec2(sdRoundBox(ep-vec3(0.00,0.04,0.18), vec3(0.98,0.155,0.78),0.08), 16.0));
+      /* cuscino verso la finestra */
+      res = opU(res, vec2(sdRoundBox(ep-vec3(0.02,0.18,-0.72), vec3(0.46,0.080,0.26),0.07), 19.0));
+      res = opU(res, vec2(sdRoundBox(ep-vec3(0.,0.08,-1.12), vec3(0.96,0.22,0.05),0.03), 26.0));
     } else res.x = min(res.x, gb);
   }
 
@@ -721,13 +728,13 @@ float mapShadow(vec3 p){
   float gb = bnd(p, vec3(0.0,0.45,0.85), vec3(1.82,0.60,0.82));
   if(gb < 0.12){
     vec3 dp = p - DESK_C;
-    d = min(d, sdBox(dp - vec3(0.0,-0.035,0.0), vec3(1.55,0.072,0.55)));
-    d = min(d, sdBox(vec3(abs(dp.x)-1.35, dp.y+0.42, dp.z), vec3(0.06,0.38,0.46)));
+    d = min(d, sdBox(dp, vec3(1.55,0.042,0.55)));
+    d = min(d, sdBox(vec3(abs(dp.x)-1.12, dp.y+0.395, dp.z+0.04), vec3(0.22,0.36,0.38)));
   } else d = min(d, gb);
 
   gb = max(1.58 - p.x, abs(p.z + 1.64) - 1.16);
   if(gb < 0.12){
-    d = min(d, sdBox((p - BED_C) - vec3(0.0,-0.05,0.0), vec3(0.97,0.29,1.18)));
+    d = min(d, sdBox((p - BED_C) - vec3(0.0,-0.16,0.0), vec3(0.90,0.14,1.08)));
   } else d = min(d, gb);
 
   gb = max(p.x + 3.26, abs(p.z + 0.45) - 1.16);
@@ -1298,15 +1305,10 @@ void getMaterial(float mid, vec3 pos, vec3 n, vec3 v, float fres,
 
   if(mid==2.0){ shellMaterial(pos, n, alb, gloss, emis, nOut); }
   else if(mid==4.0){
-    /* top scrivania: laccato quasi nero, specchiante */
-    alb = vec3(0.028,0.030,0.038);
-    gloss = 0.93;
-    alb *= 0.90 + 0.20*fbm2(pos.xz*3.4);
-    /* alone del LED perimetrale, solo sul bordo del piano */
-    vec2 dq = abs(pos.xz - DESK_C.xz);
-    float rim = max(smoothstep(0.30,0.02, 0.55-dq.y), smoothstep(0.26,0.02, 1.55-dq.x));
-    emis += vec3(0.26,0.06,0.55)*rim*rim*0.55;
-    emis += vec3(0.42,0.11,0.72)*smoothstep(0.040,0.0,abs(dq.y-0.545))*0.75;
+    /* gunmetal satin: charcoal visibile, non nero a specchio */
+    alb = vec3(0.108,0.112,0.124);
+    gloss = 0.48;
+    alb *= 0.93 + 0.10*fbm2(vec2(pos.x*1.4, pos.z*7.5));
   }
   else if(mid==5.0){ alb=vec3(0.048,0.050,0.060); gloss=0.32; }
   else if(mid==6.0){
@@ -1353,36 +1355,41 @@ void getMaterial(float mid, vec3 pos, vec3 n, vec3 v, float fres,
     gloss = mix(gloss, 0.26, ice);
   }
   else if(mid==13.0){
-    /* LED viola scrivania */
-    emis = vec3(0.60,0.12,1.0)*(3.4+0.3*sin(t*1.6+pos.x*3.0));
+    emis = vec3(0.52,0.15,0.64)*1.55;
     alb = vec3(0.02); gloss = 0.0;
   }
   else if(mid==14.0){
-    emis = vec3(0.13,0.50,0.90)*(2.5+0.25*sin(t*1.2+pos.x*2.0+pos.z*1.5));
+    float bedLed = smoothstep(0.28, 0.08, pos.y);
+    emis = mix(vec3(0.13,0.50,0.90), vec3(0.26,0.78,1.18), bedLed)
+         * (2.6 + 2.8*bedLed + 0.18*sin(t*1.2+pos.x*2.0+pos.z*1.5));
     alb = vec3(0.02); gloss = 0.0;
   }
   else if(mid==15.0){
-    /* materasso: tessuto tecnico grigio-malva, deve restare visibile */
-    alb = vec3(0.078,0.068,0.082);
-    gloss = 0.06;
+    /* materasso: plum, più caldo e chiaro del gunmetal della scrivania */
+    alb = vec3(0.22,0.155,0.175);
+    gloss = 0.08;
     vec2 q = pos.xz*5.2;
-    alb *= 0.88 + 0.18*smoothstep(0.35,0.5,max(abs(fract(q.x)-0.5),abs(fract(q.y)-0.5)));
-    alb *= 0.90 + 0.20*fbm2(pos.xz*7.0);
+    alb *= 0.88 + 0.20*smoothstep(0.35,0.5,max(abs(fract(q.x)-0.5),abs(fract(q.y)-0.5)));
+    alb *= 0.90 + 0.22*fbm2(pos.xz*7.0);
   }
   else if(mid==16.0){
-    alb = vec3(0.095,0.084,0.102);
-    gloss = 0.09;
-    alb *= 0.86 + 0.26*fbm2(pos.xz*6.0 + pos.y*3.0);
+    /* coperta: lino taupe-polvere, contrasto netto con materasso e tavolo */
+    alb = vec3(0.38,0.345,0.315);
+    gloss = 0.12;
+    alb *= 0.84 + 0.26*fbm2(pos.xz*5.5 + pos.y*3.0);
+    float fold = 0.5 + 0.5*sin(pos.z*8.0 + pos.x*1.6);
+    alb *= 0.88 + 0.18*fold;
   }
   else if(mid==17.0){
     alb=vec3(0.045,0.045,0.058); gloss=0.52;
     vec3 mp = pos-vec3(1.18,0.85,0.60);
     emis += vec3(0.45,0.20,0.80)*smoothstep(0.010,0.0,abs(mp.y-0.062))*0.75;
   }
-  else if(mid==18.0){
-    float pulse = 0.6+0.4*sin(t*4.0);
-    emis = vec3(0.14,0.60,0.75)*pulse*0.55;
-    alb = vec3(0.024,0.026,0.032); gloss = 0.4;
+  else if(mid==19.0){
+    /* cuscino: malva polveroso */
+    alb = vec3(0.32,0.245,0.268);
+    gloss = 0.11;
+    alb *= 0.86 + 0.24*fbm2(pos.xz*8.0 + pos.y*5.0);
   }
   else if(mid==20.0){
     /* diffusore plafoniera */
@@ -1482,10 +1489,8 @@ vec3 planarReflect(vec3 pos, vec3 rd, float gloss, float fres){
     float inside = min(1.55-d.x, 0.55-d.y);
     if(inside > 0.0){
       float e = smoothstep(0.0, 0.035, inside);
-      acc += vec3(0.035,0.038,0.048)*e;
-      float rim = max(smoothstep(0.045,0.0,abs(d.y-0.55)),
-                      smoothstep(0.045,0.0,abs(d.x-1.55)));
-      acc += vec3(0.48,0.12,0.82)*rim*e*2.1;
+      acc += vec3(0.055,0.058,0.068)*e;
+      acc += vec3(0.42,0.14,0.58)*smoothstep(0.035,0.0,abs(d.y-0.55))*e*1.15;
     }
   }
 
@@ -1496,8 +1501,9 @@ vec3 planarReflect(vec3 pos, vec3 rd, float gloss, float fres){
     float inside = min(0.97-d.x, 1.12-d.y);
     if(inside > 0.0){
       float e = smoothstep(0.0, 0.05, inside);
-      acc += vec3(0.055,0.050,0.062)*e;
-      acc += vec3(0.10,0.38,0.78)*smoothstep(0.12,0.0,abs(d.x-0.90))*e*1.15;
+      acc += vec3(0.085,0.072,0.078)*e;
+      acc += vec3(0.20,0.62,1.05)*smoothstep(0.16,0.0,abs(d.x-0.86))*e*2.45;
+      acc += vec3(0.14,0.48,0.90)*smoothstep(0.16,0.0,abs(d.y-1.02))*e*1.65;
     }
   }
   return acc * w;
@@ -1535,10 +1541,12 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
 
   /* LED puri: niente normali/AO/ombre */
   if(mid==13.0){
-    return vec3(0.60,0.12,1.0)*(3.6+0.3*sin(t*1.6+pos.x*3.0));
+    return vec3(0.52,0.15,0.64)*(1.55+0.08*sin(t*1.6+pos.x*3.0));
   }
   if(mid==14.0){
-    return vec3(0.14,0.52,0.92)*(2.8+0.25*sin(t*1.2+pos.x*2.0+pos.z*1.5));
+    float bedLed = smoothstep(0.28, 0.08, pos.y);
+    return mix(vec3(0.14,0.52,0.92), vec3(0.28,0.82,1.25), bedLed)
+         * (2.8 + 3.2*bedLed + 0.18*sin(t*1.2+pos.x*2.0+pos.z*1.5));
   }
   if(mid==20.0){
     vec3 e = vec3(0.78,0.90,1.12)*5.2*(0.99 + 0.01*sin(t*13.0 + pos.z*4.0));
@@ -1612,8 +1620,6 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
   }
 
   /* ----- materiali generici ----- */
-
-  /* ----- materiali generici ----- */
   vec3 alb, emis, nOut; float gloss;
   getMaterial(mid, pos, n, v, fres, alb, gloss, emis, nOut);
   n = nOut;
@@ -1635,23 +1641,47 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
 
   /* strisce LED */
   col += stripLighting(pos, n, ao) * alb * 1.35;
+  if(mid==15.0 || mid==16.0 || mid==19.0){
+    /* fill caldo: le lenzuola restano taupe/plum, non navy come il tavolo */
+    col += alb * vec3(0.30,0.26,0.24) * (0.85 + 0.40*n.y);
+    col += alb * vec3(0.10,0.28,0.55) * max(-n.x,0.0) * 0.40;
+    col += vec3(0.032,0.024,0.022);
+  }
 
   if(gloss > 0.05){
     vec3 rr = reflect(rd,n);
-    float gk = n.y > 0.65 ? 11.0 : 26.0;
-    col += stripGlow(pos + n*0.02, rr, 11.0, gk) * (0.10 + 0.90*fres) * gloss * 1.25;
-    if(rr.z < -0.05){
-      float tw = (GLASS_Z-pos.z)/rr.z;
-      if(tw > 0.0 && sdOctRect((pos+rr*tw).xy-WIN_C.xy, WIN_B, WIN_CH) < 0.0){
-        col += skyLite(rr)*(0.18+0.82*fres)*gloss*1.85;
+    if(mid==4.0){
+      /* satin: specchiature strette delle plafoniere, niente alone viola */
+      col += stripGlowN(pos + n*0.02, rr, 11.0, 58.0, 2) * (0.18 + 0.55*fres);
+      float sx = abs(abs(pos.x) - 1.08);
+      float streak = exp(-sx*sx*20.0) * smoothstep(0.52, 0.18, abs(pos.z - DESK_C.z));
+      col += vec3(0.72,0.82,1.00) * streak * (0.14 + 0.22*max(dot(n,v),0.0));
+      col += alb * vec3(0.20,0.30,0.46) * 0.38;
+      if(rr.z < -0.05){
+        float tw = (GLASS_Z-pos.z)/rr.z;
+        if(tw > 0.0 && sdOctRect((pos+rr*tw).xy-WIN_C.xy, WIN_B, WIN_CH) < 0.0){
+          col += skyLite(rr)*(0.10+0.32*fres)*gloss;
+        }
       }
+      vec3 H = normalize(Lw + v);
+      float spec = pow(max(dot(n,H),0.0), 36.0) * gloss * mix(0.20, 0.85, sh);
+      col += spec * vec3(0.78,0.86,1.02) * 0.35;
+    } else {
+      float gk = n.y > 0.65 ? 11.0 : 26.0;
+      col += stripGlow(pos + n*0.02, rr, 11.0, gk) * (0.10 + 0.90*fres) * gloss * 1.25;
+      if(rr.z < -0.05){
+        float tw = (GLASS_Z-pos.z)/rr.z;
+        if(tw > 0.0 && sdOctRect((pos+rr*tw).xy-WIN_C.xy, WIN_B, WIN_CH) < 0.0){
+          col += skyLite(rr)*(0.18+0.82*fres)*gloss*1.85;
+        }
+      }
+      if(n.y > 0.65 && pos.y < 0.12){
+        col += planarReflect(pos, rd, gloss, fres);
+      }
+      vec3 H = normalize(Lw + v);
+      float spec = pow(max(dot(n,H),0.0), mix(20.0, 90.0, gloss)) * gloss * mix(0.25, 1.0, sh);
+      col += spec * vec3(0.72,0.84,1.06) * 0.62;
     }
-    if(n.y > 0.65 && pos.y < 0.12){
-      col += planarReflect(pos, rd, gloss, fres);
-    }
-    vec3 H = normalize(Lw + v);
-    float spec = pow(max(dot(n,H),0.0), mix(20.0, 90.0, gloss)) * gloss * mix(0.25, 1.0, sh);
-    col += spec * vec3(0.72,0.84,1.06) * 0.62;
   }
 
   col += emis;
