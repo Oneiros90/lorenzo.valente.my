@@ -57,11 +57,12 @@
     "projects": {
       "title": "GitHub Projects",
       "subtitle": "Octopus archive · holographic transmission",
-      "prev": "previous",
-      "next": "next",
       "stars": "★",
       "lang": "LANG",
-      "note": "Configure the list in projects.json"
+      "note": "Live uplink · github.com/Oneiros90",
+      "empty": "No projects in archive",
+      "error": "GitHub uplink unavailable",
+      "noDescription": "No description"
     },
     "company": {
       "subtitle": "Holographic orb · ID {id}",
@@ -108,24 +109,6 @@
       "role": "Tech Lead",
       "period": "2024 — present",
       "description": "Coordination of cross-functional teams, architectural review and delivery of mission-critical digital products."
-    }
-  },
-  "projects": {
-    "orbital-chess": {
-      "name": "orbital-chess",
-      "description": "Chess engine with holographic WebGL interface and real-time neural evaluation."
-    },
-    "enceladus-ui": {
-      "name": "enceladus-ui",
-      "description": "Sci-fi UI component library: panels, HUDs and cyberpunk transitions ready to use."
-    },
-    "plume-tracker": {
-      "name": "plume-tracker",
-      "description": "Data pipeline for monitoring Enceladus geysers with real-time dashboard."
-    },
-    "shader-forge": {
-      "name": "shader-forge",
-      "description": "GLSL shader playground with hot-reload, post-processing presets and ShaderToy export."
     }
   },
   "errors": {

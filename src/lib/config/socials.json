@@ -37,7 +37,7 @@
   },
   {
     "id": "mail",
-    "url": "mailto:hello@lorenzo.valente.my",
+    "url": "mailto:lorenzo@valente.my",
     "colorA": [0.4, 0.85, 0.95],
     "colorB": [0.7, 0.95, 1.0]
   }

@@ -9,10 +9,13 @@ export interface CompanyConfig {
 
 export interface ProjectConfig {
   id: string;
+  name: string;
+  description: string;
   url: string;
   stars: number;
   lang: string;
   tags: string[];
+  imageUrl: string | null;
 }
 
 export interface BioConfig {

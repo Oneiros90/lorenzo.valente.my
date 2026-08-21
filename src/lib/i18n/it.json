@@ -57,11 +57,12 @@
     "projects": {
       "title": "Progetti GitHub",
       "subtitle": "Archivio del polpo · trasmissione olografica",
-      "prev": "precedente",
-      "next": "successivo",
       "stars": "★",
       "lang": "LANG",
-      "note": "Configura l'elenco in projects.json"
+      "note": "Uplink live · github.com/Oneiros90",
+      "empty": "Nessun progetto in archivio",
+      "error": "Uplink GitHub non disponibile",
+      "noDescription": "Nessuna descrizione"
     },
     "company": {
       "subtitle": "Sfera olografica · ID {id}",
@@ -108,24 +109,6 @@
       "role": "Tech Lead",
       "period": "2024 — presente",
       "description": "Coordinamento team cross-funzionali, revisione architetturale e delivery di prodotti digitali mission-critical."
-    }
-  },
-  "projects": {
-    "orbital-chess": {
-      "name": "orbital-chess",
-      "description": "Motore scacchistico con interfaccia olografica WebGL e valutazione neurale in tempo reale."
-    },
-    "enceladus-ui": {
-      "name": "enceladus-ui",
-      "description": "Libreria di componenti UI sci-fi: pannelli, HUD e transizioni cyberpunk pronte all'uso."
-    },
-    "plume-tracker": {
-      "name": "plume-tracker",
-      "description": "Pipeline dati per il monitoraggio dei geyser di Encelado con dashboard in tempo reale."
-    },
-    "shader-forge": {
-      "name": "shader-forge",
-      "description": "Playground per shader GLSL con hot-reload, preset di post-processing e export ShaderToy."
     }
   },
   "errors": {

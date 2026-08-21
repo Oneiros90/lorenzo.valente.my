@@ -12,9 +12,8 @@ declare module '$lib/config/companies.json' {
   export default value;
 }
 
-declare module '$lib/config/projects.json' {
-  import type { ProjectConfig } from '$lib/webgl/types';
-  const value: ProjectConfig[];
+declare module '$lib/config/github.json' {
+  const value: { username: string };
   export default value;
 }
 

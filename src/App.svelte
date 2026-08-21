@@ -8,21 +8,25 @@
   import ProjectsPanel from '$lib/components/panels/ProjectsPanel.svelte';
   import CompanyPanel from '$lib/components/panels/CompanyPanel.svelte';
   import companies from '$lib/config/companies.json';
-  import projects from '$lib/config/projects.json';
   import bio from '$lib/config/bio.json';
   import chess from '$lib/config/chess.json';
   import scene from '$lib/config/scene.json';
   import socials from '$lib/config/socials.json';
+  import { fetchGithubProjects } from '$lib/github';
   import { cameraConfig, isDesktopViewport } from '$lib/webgl/camera';
   import { getDefaultLocale, getLocaleData, type Locale, type LocaleData } from '$lib/i18n';
   import { isSocialPick, socialIndexFromPick } from '$lib/webgl/socials';
-  import type { PickId } from '$lib/webgl/types';
+  import type { PickId, ProjectConfig } from '$lib/webgl/types';
 
   let locale: Locale = $state(getDefaultLocale());
   let strings: LocaleData = $derived(getLocaleData(locale));
   let hover: PickId = $state(0);
   let active: PickId = $state(0);
-  let bootDone = $state(false);
+  let projects = $state.raw<ProjectConfig[]>([]);
+  let projectsError = $state(false);
+  let githubReady = $state(false);
+  let bootMinElapsed = $state(false);
+  let bootDone = $derived(githubReady && bootMinElapsed);
   let errorType = $state<'webgl' | 'shader' | null>(null);
   let errorDetail = $state('');
   let clock = $state('');
@@ -87,10 +91,28 @@
   });
 
   $effect(() => {
-    const id = window.setTimeout(() => {
-      bootDone = true;
+    const ac = new AbortController();
+    let cancelled = false;
+    const minTimer = window.setTimeout(() => {
+      if (!cancelled) bootMinElapsed = true;
     }, scene.bootDurationMs);
-    return () => clearTimeout(id);
+
+    fetchGithubProjects(ac.signal)
+      .then((list) => {
+        if (!cancelled) projects = list;
+      })
+      .catch(() => {
+        if (!cancelled) projectsError = true;
+      })
+      .finally(() => {
+        if (!cancelled) githubReady = true;
+      });
+
+    return () => {
+      cancelled = true;
+      ac.abort();
+      clearTimeout(minTimer);
+    };
   });
 
   $effect(() => {
@@ -132,7 +154,7 @@
   <Hud {strings} {clock} hidden={panelOpen} />
   <BioPanel open={active === 1} {strings} {bio} onclose={onClose} />
   <ChessPanel open={active === 2} {strings} {chess} onclose={onClose} />
-  <ProjectsPanel open={active === 3} {strings} {projects} onclose={onClose} />
+  <ProjectsPanel open={active === 3} {strings} {projects} error={projectsError} onclose={onClose} />
   <CompanyPanel
     open={active >= 4 && active <= 7}
     {companyIndex}
