@@ -18,16 +18,51 @@ export interface ProjectConfig {
   imageUrl: string | null;
 }
 
+export interface GithubProfile {
+  name: string;
+  username: string;
+  avatar: string | null;
+  url: string;
+  location: string;
+  company: string;
+  followers: number | null;
+  joined: string | null;
+  publicRepos: number | null;
+}
+
 export interface BioConfig {
   archiveId: string;
   status: string;
 }
 
+export type ChessResult = 'win' | 'draw' | 'loss';
+
+export type ChessTimeClassId = 'rapid' | 'blitz' | 'bullet';
+
+export interface ChessTimeControl {
+  id: ChessTimeClassId;
+  rating: number | null;
+  best: number | null;
+  wins: number;
+  losses: number;
+  draws: number;
+  spark: number[];
+}
+
 export interface ChessConfig {
-  rapid: number;
-  blitz: number;
-  bullet: number;
-  lastGame: string;
+  name: string;
+  username: string;
+  avatar: string | null;
+  url: string;
+  location: string;
+  league: string;
+  followers: number | null;
+  joined: number | null;
+  premium: boolean;
+  timeControls: ChessTimeControl[];
+  lastGameResult: ChessResult | null;
+  lastGameOpening: string;
+  lastGameUrl: string | null;
 }
 
 export interface SceneConfig {

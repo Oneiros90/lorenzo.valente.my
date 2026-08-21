@@ -48,18 +48,34 @@
     "chess": {
       "title": "Chess.com",
       "subtitle": "Uplink torneo orbitale · tempo reale",
-      "eloRapid": "ELO Rapid",
+      "rapid": "Rapid",
       "blitz": "Blitz",
       "bullet": "Bullet",
+      "best": "Picco",
+      "games": "Partite",
+      "winRate": "Winrate",
+      "followers": "Follower",
+      "league": "Lega",
+      "location": "Base",
+      "joined": "Iscritto",
+      "premium": "Premium",
       "lastGame": "Ultima partita",
-      "note": "Dati dimostrativi · sincronizzare con API chess.com"
+      "note": "Uplink live",
+      "empty": "Nessuna partita in archivio",
+      "error": "Uplink Chess.com non disponibile",
+      "win": "VITTORIA",
+      "loss": "SCONFITTA",
+      "draw": "PATTA"
     },
     "projects": {
       "title": "Progetti GitHub",
       "subtitle": "Archivio del polpo · trasmissione olografica",
       "stars": "★",
       "lang": "LANG",
-      "note": "Uplink live · github.com/Oneiros90",
+      "followers": "Follower",
+      "joined": "Iscritto",
+      "repos": "repo",
+      "note": "Uplink live",
       "empty": "Nessun progetto in archivio",
       "error": "Uplink GitHub non disponibile",
       "noDescription": "Nessuna descrizione"
@@ -79,11 +95,6 @@
     "specialization": "Full Stack Developer",
     "base": "Enceladus Prime · Modulo 7",
     "description": "Appassionato di tecnologia, design e intelligenza artificiale. Creo esperienze digitali immersive e funzionali, sempre alla ricerca di nuove sfide in ambienti innovativi — anche a 1,3 miliardi di km dal Sole."
-  },
-  "chess": {
-    "lastGames": {
-      "sicilian-najdorf": "VITTORIA · Sicilia Najdorf"
-    }
   },
   "companies": {
     "novatech": {

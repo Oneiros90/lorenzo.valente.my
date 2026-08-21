@@ -24,8 +24,7 @@ declare module '$lib/config/bio.json' {
 }
 
 declare module '$lib/config/chess.json' {
-  import type { ChessConfig } from '$lib/webgl/types';
-  const value: ChessConfig;
+  const value: { username: string };
   export default value;
 }
 

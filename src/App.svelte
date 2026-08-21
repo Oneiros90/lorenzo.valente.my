@@ -9,24 +9,28 @@
   import CompanyPanel from '$lib/components/panels/CompanyPanel.svelte';
   import companies from '$lib/config/companies.json';
   import bio from '$lib/config/bio.json';
-  import chess from '$lib/config/chess.json';
   import scene from '$lib/config/scene.json';
   import socials from '$lib/config/socials.json';
-  import { fetchGithubProjects } from '$lib/github';
+  import { EMPTY_CHESS, fetchChessStats } from '$lib/chess';
+  import { EMPTY_GITHUB_PROFILE, fetchGithubProjects } from '$lib/github';
   import { cameraConfig, isDesktopViewport } from '$lib/webgl/camera';
   import { getDefaultLocale, getLocaleData, type Locale, type LocaleData } from '$lib/i18n';
   import { isSocialPick, socialIndexFromPick } from '$lib/webgl/socials';
-  import type { PickId, ProjectConfig } from '$lib/webgl/types';
+  import type { GithubProfile, PickId, ProjectConfig } from '$lib/webgl/types';
 
   let locale: Locale = $state(getDefaultLocale());
   let strings: LocaleData = $derived(getLocaleData(locale));
   let hover: PickId = $state(0);
   let active: PickId = $state(0);
   let projects = $state.raw<ProjectConfig[]>([]);
+  let githubProfile = $state.raw<GithubProfile>(EMPTY_GITHUB_PROFILE);
   let projectsError = $state(false);
   let githubReady = $state(false);
+  let chess = $state.raw(EMPTY_CHESS);
+  let chessError = $state(false);
+  let chessReady = $state(false);
   let bootMinElapsed = $state(false);
-  let bootDone = $derived(githubReady && bootMinElapsed);
+  let bootDone = $derived(githubReady && chessReady && bootMinElapsed);
   let errorType = $state<'webgl' | 'shader' | null>(null);
   let errorDetail = $state('');
   let clock = $state('');
@@ -97,16 +101,23 @@
       if (!cancelled) bootMinElapsed = true;
     }, scene.bootDurationMs);
 
-    fetchGithubProjects(ac.signal)
-      .then((list) => {
-        if (!cancelled) projects = list;
+    Promise.allSettled([
+      fetchGithubProjects(ac.signal).then((payload) => {
+        if (!cancelled) {
+          githubProfile = payload.profile;
+          projects = payload.projects;
+        }
+      }),
+      fetchChessStats(ac.signal).then((data) => {
+        if (!cancelled) chess = data;
       })
-      .catch(() => {
-        if (!cancelled) projectsError = true;
-      })
-      .finally(() => {
-        if (!cancelled) githubReady = true;
-      });
+    ]).then((results) => {
+      if (cancelled) return;
+      if (results[0].status === 'rejected') projectsError = true;
+      if (results[1].status === 'rejected') chessError = true;
+      githubReady = true;
+      chessReady = true;
+    });
 
     return () => {
       cancelled = true;
@@ -153,8 +164,15 @@
   <BootOverlay {strings} done={bootDone} />
   <Hud {strings} {clock} hidden={panelOpen} />
   <BioPanel open={active === 1} {strings} {bio} onclose={onClose} />
-  <ChessPanel open={active === 2} {strings} {chess} onclose={onClose} />
-  <ProjectsPanel open={active === 3} {strings} {projects} error={projectsError} onclose={onClose} />
+  <ChessPanel open={active === 2} {strings} {chess} error={chessError} onclose={onClose} />
+  <ProjectsPanel
+    open={active === 3}
+    {strings}
+    profile={githubProfile}
+    {projects}
+    error={projectsError}
+    onclose={onClose}
+  />
   <CompanyPanel
     open={active >= 4 && active <= 7}
     {companyIndex}

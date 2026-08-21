@@ -1,14 +1,39 @@
 import github from '$lib/config/github.json';
-import type { ProjectConfig } from '$lib/webgl/types';
+import type { GithubProfile, ProjectConfig } from '$lib/webgl/types';
 
 const FETCH_TIMEOUT_MS = 8000;
 const README_TIMEOUT_MS = 5000;
+const USER_URL = `https://api.github.com/users/${github.username}`;
 const REPOS_URL = `https://api.github.com/users/${github.username}/repos?per_page=100&type=owner`;
+
+export const EMPTY_GITHUB_PROFILE: GithubProfile = {
+  name: '',
+  username: github.username,
+  avatar: null,
+  url: `https://github.com/${github.username}`,
+  location: '',
+  company: '',
+  followers: null,
+  joined: null,
+  publicRepos: null
+};
 
 const MD_IMG = /!\[[^\]]*]\(\s*<?([^)\s>]+)>?(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)/g;
 const HTML_IMG = /<img\b[^>]*?\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>/gi;
 const BADGE_RE =
   /shields\.io|badgen\.net|badge|travis-ci|codecov|coveralls|appveyor|circleci|dependabot|github\.com\/[^/]+\/[^/]+\/(?:actions|workflows)|commitizen|snyk\.io/i;
+
+interface GithubUser {
+  name: string | null;
+  login: string;
+  avatar_url: string;
+  html_url: string;
+  location: string | null;
+  company: string | null;
+  followers: number;
+  created_at: string;
+  public_repos: number;
+}
 
 interface GithubRepo {
   name: string;
@@ -20,6 +45,25 @@ interface GithubRepo {
   fork: boolean;
   updated_at: string;
   default_branch: string;
+}
+
+export interface GithubPayload {
+  profile: GithubProfile;
+  projects: ProjectConfig[];
+}
+
+function toProfile(user: GithubUser): GithubProfile {
+  return {
+    name: user.name ?? '',
+    username: user.login,
+    avatar: user.avatar_url || null,
+    url: user.html_url,
+    location: user.location ?? '',
+    company: user.company?.replace(/^@/, '') ?? '',
+    followers: user.followers,
+    joined: user.created_at,
+    publicRepos: user.public_repos
+  };
 }
 
 function toProject(repo: GithubRepo, imageUrl: string | null): ProjectConfig {
@@ -124,15 +168,19 @@ async function readmeImageUrl(repo: GithubRepo, signal?: AbortSignal): Promise<s
   return resolveReadmeImage(src, github.username, repo.name, repo.default_branch || 'main');
 }
 
-export async function fetchGithubProjects(signal?: AbortSignal): Promise<ProjectConfig[]> {
+export async function fetchGithubProjects(signal?: AbortSignal): Promise<GithubPayload> {
   const { signal: combined, cleanup } = combineSignals(signal);
+  const headers = { Accept: 'application/vnd.github+json' };
   try {
-    const res = await fetch(REPOS_URL, {
-      signal: combined,
-      headers: { Accept: 'application/vnd.github+json' }
-    });
-    if (!res.ok) throw new Error(`GitHub ${res.status}`);
-    const repos = (await res.json()) as GithubRepo[];
+    const [userRes, reposRes] = await Promise.all([
+      fetch(USER_URL, { signal: combined, headers }),
+      fetch(REPOS_URL, { signal: combined, headers })
+    ]);
+    if (!reposRes.ok) throw new Error(`GitHub ${reposRes.status}`);
+    const repos = (await reposRes.json()) as GithubRepo[];
+    const profile = userRes.ok
+      ? toProfile((await userRes.json()) as GithubUser)
+      : EMPTY_GITHUB_PROFILE;
     const selected = repos
       .filter((repo) => !repo.fork)
       .sort((a, b) => {
@@ -141,9 +189,10 @@ export async function fetchGithubProjects(signal?: AbortSignal): Promise<Project
         }
         return Date.parse(b.updated_at) - Date.parse(a.updated_at);
       });
-    return await Promise.all(
+    const projects = await Promise.all(
       selected.map(async (repo) => toProject(repo, await readmeImageUrl(repo, signal)))
     );
+    return { profile, projects };
   } finally {
     cleanup();
   }
