@@ -27,3 +27,7 @@ export function t(template: string, vars: Record<string, string | number> = {}):
 export function colorToHex(rgb: number[]): string {
   return '#' + rgb.map((v) => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
 }
+
+export function loc(text: { en: string; it: string }, locale: Locale): string {
+  return text[locale] ?? text.en;
+}

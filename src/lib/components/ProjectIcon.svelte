@@ -10,7 +10,7 @@
 
 <div class="project-icon">
   {#if src && !failed}
-    <img {src} alt={name} onerror={() => (failed = true)} />
+    <img {src} alt={name} referrerpolicy="no-referrer" onerror={() => (failed = true)} />
   {:else}
     <svg viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path

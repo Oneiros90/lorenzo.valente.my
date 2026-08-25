@@ -7,11 +7,12 @@
   import ChessPanel from '$lib/components/panels/ChessPanel.svelte';
   import ProjectsPanel from '$lib/components/panels/ProjectsPanel.svelte';
   import CompanyPanel from '$lib/components/panels/CompanyPanel.svelte';
-  import { bio, companies } from 'virtual:cv-profile';
+  import profile from '$lib/config/profile.json';
   import scene from '$lib/config/scene.json';
   import socials from '$lib/config/socials.json';
   import { EMPTY_CHESS, fetchChessStats } from '$lib/chess';
   import { EMPTY_GITHUB_PROFILE, fetchGithubProjects } from '$lib/github';
+  import { preloadImages } from '$lib/preload';
   import { cameraConfig, isDesktopViewport } from '$lib/webgl/camera';
   import { getDefaultLocale, getLocaleData, type Locale, type LocaleData } from '$lib/i18n';
   import { isSocialPick, socialIndexFromPick } from '$lib/webgl/socials';
@@ -36,6 +37,8 @@
   let clock = $state('');
   let desktop = $state(typeof window !== 'undefined' ? isDesktopViewport() : true);
 
+  const bio = profile.bio;
+  const companies = profile.companies;
   const companyIndex = $derived(isCompanyPick(active, companies.length) ? companyIndexFromPick(active) : 0);
   const panelOpen = $derived(active !== 0 && !isSocialPick(active));
   const focusCamera = $derived(panelOpen && desktop);
@@ -107,14 +110,21 @@
           githubProfile = payload.profile;
           projects = payload.projects;
         }
+        return payload;
       }),
       fetchChessStats(ac.signal).then((data) => {
         if (!cancelled) chess = data;
-      })
-    ]).then((results) => {
+      }),
+      preloadImages(companies.flatMap((c) => c.projects.map((p) => p.imageUrl)))
+    ]).then(async (results) => {
       if (cancelled) return;
       if (results[0].status === 'rejected') projectsError = true;
       if (results[1].status === 'rejected') chessError = true;
+      await preloadImages([
+        githubProfile.avatar,
+        ...projects.map((project) => project.imageUrl)
+      ]);
+      if (cancelled) return;
       githubReady = true;
       chessReady = true;
     });
@@ -163,7 +173,7 @@
   />
   <BootOverlay {strings} done={bootDone} />
   <Hud {strings} {clock} hidden={panelOpen} />
-  <BioPanel open={active === 1} {strings} {bio} onclose={onClose} />
+  <BioPanel open={active === 1} {strings} {bio} cvUrl={profile.cvUrl} onclose={onClose} />
   <ChessPanel open={active === 2} {strings} {chess} error={chessError} onclose={onClose} />
   <ProjectsPanel
     open={active === 3}

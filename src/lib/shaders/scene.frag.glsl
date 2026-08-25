@@ -59,6 +59,15 @@ float sdCapsule(vec3 p, vec3 a, vec3 b, float r){
   float h=clamp(dot(pa,ba)/dot(ba,ba),0.,1.);
   return length(pa-ba*h)-r;
 }
+float sdEllipsoid(vec3 p, vec3 r){
+  float k0=length(p/r), k1=length(p/(r*r));
+  return k0*(k0-1.0)/max(k1,1e-5);
+}
+float sdTaperCap(vec3 p, vec3 a, vec3 b, float ra, float rb){
+  vec3 pa=p-a, ba=b-a;
+  float h=clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0);
+  return length(pa-ba*h)-mix(ra,rb,h*h*(3.0-2.0*h));
+}
 float smin(float a, float b, float k){
   float h=clamp(0.5+0.5*(b-a)/k,0.,1.);
   return mix(b,a,h)-k*h*(1.-h);
@@ -105,7 +114,7 @@ const float WIN_CH = 0.50;
 const float WALL_F = -3.68;    /* faccia interna parete finestra */
 const float GLASS_Z = -3.74;
 
-const vec3 TAB_C = vec3(-0.70,0.83,0.80);
+const vec3 TAB_C = vec3(-1.02,0.96,0.90);
 const vec3 BRD_C = vec3(0.58,0.805,0.82);
 const vec3 OCT_C = vec3(1.12,0.80,1.10);
 const vec3 DESK_C = vec3(0.,0.75,0.85);
@@ -114,17 +123,104 @@ const vec3 BED_C  = vec3(2.55,0.34,-1.60);
 const vec3 SAT_DIR = vec3(-0.28801,0.16321,-0.94357); /* normalize(-0.30,0.17,-1.0) */
 
 const float OCT_YAW = atan(0.0 - OCT_C.x, 2.10 - OCT_C.z);
+const float ORB_Z_OFF[8] = float[8](0.14,-0.11,0.07,-0.16,0.10,-0.08,0.12,-0.09);
 vec3 octToLocal(vec3 q){
   float c = cos(OCT_YAW), s = sin(OCT_YAW);
   return vec3(c*q.x - s*q.z, q.y, s*q.x + c*q.z);
 }
+/* Octocat (Mona): testa sul tronco, 4 zampe-colonna, coda alzata a -X
+   (sinistra del viewer dalla camera scrivania). +Z verso camera. */
+vec3 octHeadC(float t){
+  return vec3(0.0, 0.158 + 0.003*sin(t*1.7), 0.010);
+}
+void octTailPts(float t, out vec3 ta, out vec3 tm, out vec3 tt, out vec3 tp){
+  float sway = 0.008*sin(t*1.5);
+  ta = vec3(-0.036, 0.086, 0.000);
+  tm = vec3(-0.080 - sway*0.3, 0.118, -0.006);
+  tt = vec3(-0.090 - sway*0.45, 0.168, 0.012 + sway*0.15);
+  tp = vec3(-0.062 - sway*0.2, 0.186, 0.034);
+}
+vec3 octDropP(vec3 tp){ return tp + vec3(0.003, -0.011, 0.005); }
+vec3 octCupP(vec3 tm, vec3 tt, int i){
+  float u = 0.12 + float(i)*0.14;
+  return mix(tm, tt, u) + vec3(0.010, -0.008, 0.008);
+}
+float sdEar(vec3 p, vec3 a, vec3 b, float ra, float rb){
+  vec3 pa=p-a, ba=b-a;
+  float h=clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0);
+  vec3 q=pa-ba*h;
+  q.z *= 1.28;
+  return length(q)-mix(ra,rb,h);
+}
+float sdOctLeg3(vec3 q, vec3 a, vec3 b, vec3 c){
+  float d = sdTaperCap(q, a, b, 0.0180, 0.0155);
+  d = smin(d, sdTaperCap(q, b, c, 0.0155, 0.0036), 0.008);
+  return d;
+}
+float sdOctocat(vec3 q){
+  float t = iTime;
+  vec3 hc = q - octHeadC(t);
+
+  /* cranio tondo + piastra viso appiattita sul davanti */
+  float head = sdEllipsoid(hc, vec3(0.070, 0.064, 0.064));
+  float face = sdEllipsoid(hc - vec3(0.0, -0.006, 0.042), vec3(0.048, 0.044, 0.020));
+  head = smin(head, face, 0.008);
+  float eyeBulb = sdEllipsoid(hc - vec3(-0.028, 0.008, 0.056), vec3(0.009, 0.012, 0.006));
+  eyeBulb = min(eyeBulb, sdEllipsoid(hc - vec3( 0.028, 0.008, 0.056), vec3(0.009, 0.012, 0.006)));
+  head = smin(head, eyeBulb, 0.004);
+
+  /* orecchie da gatto, volume 3D (non fette) */
+  float earL = sdEar(hc, vec3(-0.028, 0.036, 0.006), vec3(-0.068, 0.098, 0.000), 0.016, 0.0024);
+  float earR = sdEar(hc, vec3( 0.028, 0.036, 0.006), vec3( 0.068, 0.098, 0.000), 0.016, 0.0024);
+  head = smin(head, min(earL, earR), 0.008);
+
+  /* collo + tronco */
+  float neck = sdTaperCap(q, vec3(0.0, 0.096, 0.006), vec3(0.0, 0.134, 0.010), 0.022, 0.030);
+  float hub = sdEllipsoid(q - vec3(0.0, 0.078, 0.002), vec3(0.034, 0.028, 0.032));
+  float body = smin(head, smin(neck, hub, 0.010), 0.012);
+
+  /* 4 zampe: 2 davanti (sbucano dal mento) + 2 dietro, colonne con lieve flare */
+  float legs = sdOctLeg3(q,
+    vec3(-0.028, 0.086,  0.030), vec3(-0.034, 0.046,  0.044), vec3(-0.036, 0.008,  0.040));
+  legs = min(legs, sdOctLeg3(q,
+    vec3( 0.028, 0.086,  0.030), vec3( 0.034, 0.046,  0.044), vec3( 0.036, 0.008,  0.040)));
+  legs = min(legs, sdOctLeg3(q,
+    vec3(-0.028, 0.086, -0.026), vec3(-0.034, 0.046, -0.038), vec3(-0.036, 0.008, -0.036)));
+  legs = min(legs, sdOctLeg3(q,
+    vec3( 0.028, 0.086, -0.026), vec3( 0.036, 0.046, -0.038), vec3( 0.038, 0.008, -0.036)));
+  body = smin(body, legs, 0.006);
+
+  /* coda: tentacolo grosso alzato a -X (verso la scacchiera), ricciolo a altezza guancia */
+  vec3 ta, tm, tt, tp;
+  octTailPts(t, ta, tm, tt, tp);
+  float tail = sdTaperCap(q, ta, tm, 0.019, 0.016);
+  tail = smin(tail, sdTaperCap(q, tm, tt, 0.016, 0.011), 0.009);
+  tail = smin(tail, sdTaperCap(q, tt, tp, 0.011, 0.0055), 0.007);
+  body = smin(body, tail, 0.007);
+
+  float cups = 1e3;
+  for(int i=0;i<6;i++) cups = min(cups, sdSphere(q - octCupP(tm, tt, i), 0.0036));
+  body = min(body, cups);
+  body = min(body, sdEllipsoid(q - octDropP(tp), vec3(0.0038, 0.0058, 0.0038)));
+
+  vec3 wc = octHeadC(t);
+  float wh = sdTaperCap(q, wc+vec3(-0.066, 0.000, 0.046), wc+vec3(-0.132, 0.008, 0.016), 0.0022, 0.0011);
+  wh = min(wh, sdTaperCap(q, wc+vec3(-0.068,-0.012, 0.044), wc+vec3(-0.134,-0.010, 0.014), 0.0022, 0.0011));
+  wh = min(wh, sdTaperCap(q, wc+vec3(-0.064,-0.024, 0.042), wc+vec3(-0.126,-0.034, 0.012), 0.0022, 0.0011));
+  wh = min(wh, sdTaperCap(q, wc+vec3( 0.066, 0.000, 0.046), wc+vec3( 0.132, 0.008, 0.016), 0.0022, 0.0011));
+  wh = min(wh, sdTaperCap(q, wc+vec3( 0.068,-0.012, 0.044), wc+vec3( 0.134,-0.010, 0.014), 0.0022, 0.0011));
+  wh = min(wh, sdTaperCap(q, wc+vec3( 0.064,-0.024, 0.042), wc+vec3( 0.126,-0.034, 0.012), 0.0022, 0.0011));
+  body = min(body, wh);
+  return body;
+}
 vec3 orbPos(int i){
   float fi = float(i);
   float n = max(uOrbCount, 1.0);
-  float z = 1.18 - (n <= 1.0 ? 0.0 : (fi / (n - 1.0)) * 0.48);
-  float xOff = (mod(fi, 2.0) < 0.5) ? -0.05 : 0.25;
+  /* i=0 più recente a destra; i=n-1 più vecchio a sinistra */
+  float slot = n <= 1.0 ? 0.5 : (n - 1.0 - fi) / (n - 1.0);
+  int vis = n <= 1.0 ? 0 : int(n) - 1 - i;
   float r = uOrbR[i];
-  return vec3(-0.22 + xOff, 0.795 + r + 0.015*sin(iTime*1.3+fi*1.9), z);
+  return vec3(-0.52 + slot * 0.68, 0.795 + r + 0.015*sin(iTime*1.3+fi*1.9), 0.90 + ORB_Z_OFF[vis]);
 }
 vec3 socialPos(int i){
   vec3 b;
@@ -140,21 +236,40 @@ vec3 socialPos(int i){
 }
 vec3 socialColorA(int i){
   if(i==0) return vec3(0.09,0.47,0.95);
-  if(i==1) return vec3(0.90,0.25,0.55);
+  if(i==1) return vec3(0.76,0.19,0.51);
   if(i==2) return vec3(0.04,0.40,0.76);
-  if(i==3) return vec3(0.15,0.65,0.90);
+  if(i==3) return vec3(0.13,0.55,0.78);
   if(i==4) return vec3(0.35,0.40,0.95);
-  if(i==5) return vec3(0.95,0.12,0.12);
-  return vec3(0.40,0.85,0.95);
+  if(i==5) return vec3(0.80,0.08,0.08);
+  return vec3(0.22,0.48,0.52);
 }
 vec3 socialColorB(int i){
-  if(i==0) return vec3(0.35,0.65,1.0);
-  if(i==1) return vec3(1.0,0.55,0.20);
-  if(i==2) return vec3(0.25,0.65,0.95);
-  if(i==3) return vec3(0.40,0.85,1.0);
-  if(i==4) return vec3(0.55,0.50,1.0);
-  if(i==5) return vec3(1.0,0.40,0.35);
-  return vec3(0.70,0.95,1.0);
+  if(i==0) return vec3(0.04,0.16,0.38);
+  if(i==1) return vec3(0.32,0.12,0.48);
+  if(i==2) return vec3(0.02,0.14,0.32);
+  if(i==3) return vec3(0.05,0.22,0.36);
+  if(i==4) return vec3(0.12,0.12,0.14);
+  if(i==5) return vec3(0.06,0.05,0.05);
+  return vec3(0.12,0.16,0.20);
+}
+/* beacon contatti: nucleo + due anelli giroscopici, tilt 18° verso la stanza */
+float socialSpin(int i){
+  float fi = float(i);
+  return iTime * (0.7 + fi * 0.15);
+}
+vec3 socialLocal(vec3 lp, int i){
+  vec3 q = lp;
+  q.xy = rot2(0.31415927) * q.xy;
+  q.xz = rot2(socialSpin(i)) * q.xz;
+  return q;
+}
+float sdSocialBeacon(vec3 lp, int i){
+  vec3 q = socialLocal(lp, i);
+  float core = sdSphere(q, 0.042);
+  float ringEq = sdTorus(q, vec2(0.070, 0.007));
+  vec3 qm = vec3(q.y, -q.x, q.z);
+  float ringMer = sdTorus(qm, vec2(0.062, 0.005));
+  return min(core, min(ringEq, ringMer));
 }
 
 /* ============================================================
@@ -274,7 +389,7 @@ float pieceProfile(vec2 cell){
     2 shell stanza  4 top scrivania  5 metallo scuro  6 corpo tablet
     7 schermo tablet 8 scacchiera  10/11 pezzi  12 bezel finestra
     13 LED viola  14 LED ciano  15 materasso  16 coperta  19 cuscino
-    17 tazza  20 diffusore plafoniera  21 condotto
+    18 stand tablet  20 diffusore plafoniera  21 condotto
     22 statuetta  23 cassa  24 octocat  25 metallo mensole
     26 bulkhead  27 accento ciano  28 display  29 grigliato
     30..36 social  40 piante  41 armi  42 tech  50..57 orbs
@@ -404,12 +519,27 @@ vec2 map(vec3 p){
 
       /* props sul piano: il pavimento sotto la scrivania non li valuta */
       if(p.y > 0.68){
-      /* tablet */
-      if(bnd(p, TAB_C, vec3(0.26,0.14,0.20)) < GB){
+      /* tablet su dock: sollevato dal piano, culla allineata alla rotazione */
+      if(bnd(p, TAB_C + vec3(0.0,-0.08,0.0), vec3(0.28,0.22,0.28)) < GB){
         vec3 tp = p - TAB_C;
         tp.yz = rot2(0.5)*tp.yz;
         res = opU(res, vec2(sdRoundBox(tp, vec3(0.21,0.012,0.15),0.008), 6.0));
         res = opU(res, vec2(sdBox(tp-vec3(0.,0.024,0.), vec3(0.185,0.004,0.125)), 7.0));
+        /* culla nella faccia bassa della lavagna */
+        res = opU(res, vec2(sdRoundBox(tp-vec3(0.,-0.028,-0.145), vec3(0.12,0.014,0.022),0.006), 18.0));
+        res = opU(res, vec2(sdRoundBox(tp-vec3(0.,0.00,-0.175), vec3(0.10,0.042,0.012),0.006), 18.0));
+        /* dock a prisma sul piano, LED perimetrale */
+        vec3 dc = vec3(TAB_C.x, 0.845, TAB_C.z + 0.02);
+        vec3 dq = p - dc;
+        res = opU(res, vec2(sdRoundBox(dq, vec3(0.195,0.055,0.080),0.016), 18.0));
+        res = opU(res, vec2(sdRoundBox(dq - vec3(0.0,0.058,-0.02), vec3(0.070,0.028,0.045),0.010), 18.0));
+        float ring = abs(sdRect2(dq.xz, vec2(0.175,0.062))) - 0.008;
+        ring = max(ring, abs(dq.y + 0.042) - 0.006);
+        res = opU(res, vec2(ring, 14.0));
+        float front = abs(dq.z - 0.082) - 0.005;
+        front = max(front, abs(dq.y + 0.010) - 0.010);
+        front = max(front, abs(dq.x) - 0.155);
+        res = opU(res, vec2(front, 14.0));
       }
 
       /* scacchiera */
@@ -429,29 +559,9 @@ vec2 map(vec3 p){
         }
       }
 
-      /* octocat */
-      if(bnd(p, OCT_C + vec3(0.,0.09,0.), vec3(0.24,0.20,0.24)) < GB){
-        vec3 q = octToLocal(p - OCT_C);
-        float wob = 0.008*sin(iTime*2.0);
-        vec3 hq = q - vec3(0.,0.085+wob,0.);
-        hq.y *= 0.82;
-        float body = sdSphere(hq, 0.062);
-        float legs = 1000.0;
-        float sec = 6.2831853/6.0;
-        for(int i=0;i<6;i++){
-          float ai = float(i)*sec + 3.14159265;
-          vec3 lq = vec3(cos(-ai)*q.x - sin(-ai)*q.z, q.y, sin(-ai)*q.x + cos(-ai)*q.z);
-          float ph = ai*3.0 + iTime*1.6;
-          vec3 tip = vec3(0.105+0.008*sin(ph), 0.012+0.006*cos(ph), 0.0);
-          float leg = sdCapsule(lq, vec3(0.035,0.055,0.), vec3(0.075,0.020,0.), 0.020);
-          leg = smin(leg, sdCapsule(lq, vec3(0.075,0.020,0.), tip, 0.014), 0.01);
-          legs = min(legs, leg);
-        }
-        float ears = min(sdCapsule(hq, vec3(-0.030,0.042,0.010), vec3(-0.050,0.098,0.002), 0.011),
-                         sdCapsule(hq, vec3( 0.030,0.042,0.010), vec3( 0.050,0.098,0.002), 0.011));
-        float oct = smin(body, legs, 0.02);
-        oct = smin(oct, ears, 0.012);
-        res = opU(res, vec2(oct, 24.0));
+      /* octocat (Mona) */
+      if(bnd(p, OCT_C + vec3(0.,0.15,0.), vec3(0.22,0.22,0.16)) < GB){
+        res = opU(res, vec2(sdOctocat(octToLocal(p - OCT_C)), 24.0));
       }
 
       /* sfere olografiche aziende + piedistalli */
@@ -466,13 +576,6 @@ vec2 map(vec3 p){
         }
       }
 
-      /* tazza con manico */
-      vec3 mp = p - vec3(1.18,0.85,0.60);
-      float mug = sdCylinder(mp, 0.065, 0.045);
-      mug = max(mug, -sdCylinder(mp - vec3(0.,0.020,0.), 0.062, 0.036));
-      float handle = sdTorus(vec3(mp.x-0.042, mp.z, mp.y), vec2(0.032,0.008));
-      handle = max(handle, -(0.042 - mp.x));
-      res = opU(res, vec2(min(mug, handle), 17.0));
       }
     } else res.x = min(res.x, gb);
   }
@@ -636,11 +739,11 @@ vec2 map(vec3 p){
     } else res.x = min(res.x, gb);
   }
 
-  /* social orbs: bounding box unico, poi le 7 sfere */
+  /* social beacons: bounding box unico, poi nucleo + anelli */
   {
-    float gb = max(3.09 - p.x, abs(p.z + 0.70) - 0.92);
+    float gb = max(3.07 - p.x, abs(p.z + 0.70) - 0.95);
     if(gb < GB){
-      for(int i=0;i<7;i++) res = opU(res, vec2(sdSphere(p-socialPos(i), 0.090), 30.0+float(i)));
+      for(int i=0;i<7;i++) res = opU(res, vec2(sdSocialBeacon(p-socialPos(i), i), 30.0+float(i)));
     } else res.x = min(res.x, gb);
   }
 
@@ -730,6 +833,7 @@ float mapShadow(vec3 p){
     vec3 dp = p - DESK_C;
     d = min(d, sdBox(dp, vec3(1.55,0.042,0.55)));
     d = min(d, sdBox(vec3(abs(dp.x)-1.12, dp.y+0.395, dp.z+0.04), vec3(0.22,0.36,0.38)));
+    d = min(d, sdBox(p - vec3(TAB_C.x, 0.86, TAB_C.z-0.04), vec3(0.22,0.12,0.22)));
   } else d = min(d, gb);
 
   gb = max(1.58 - p.x, abs(p.z + 1.64) - 1.16);
@@ -1380,10 +1484,11 @@ void getMaterial(float mid, vec3 pos, vec3 n, vec3 v, float fres,
     float fold = 0.5 + 0.5*sin(pos.z*8.0 + pos.x*1.6);
     alb *= 0.88 + 0.18*fold;
   }
-  else if(mid==17.0){
-    alb=vec3(0.045,0.045,0.058); gloss=0.52;
-    vec3 mp = pos-vec3(1.18,0.85,0.60);
-    emis += vec3(0.45,0.20,0.80)*smoothstep(0.010,0.0,abs(mp.y-0.062))*0.75;
+  else if(mid==18.0){
+    /* stand tablet: alluminio spazzolato, più chiaro del piano */
+    alb = vec3(0.10,0.108,0.122);
+    gloss = 0.64;
+    alb *= 0.90 + 0.14*fbm2(vec2(pos.x*22.0, pos.y*9.0));
   }
   else if(mid==19.0){
     /* cuscino: malva polveroso */
@@ -1527,16 +1632,24 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
     int oi = int(mid-30.0);
     vec3 ca = socialColorA(oi), cb = socialColorB(oi);
     vec3 lp = pos - socialPos(oi);
-    float r = 0.090;
-    vec3 nA = lp / max(length(lp), 1e-4);
-    float lat = clamp(lp.y / r, -1.0, 1.0);
-    float lon = atan(lp.z, lp.x);
-    vec3 hue = mix(ca, cb, 0.5 + 0.5*sin(lat*4.5 + lon*2.0 + t*(1.2+float(oi)*0.25)));
-    float ring = smoothstep(0.14, 0.0, abs(lat - 0.2*sin(t*0.9+float(oi))));
+    vec3 q = socialLocal(lp, oi);
+    float d = length(lp);
+    float coreM = smoothstep(0.055, 0.042, d);
+    vec3 nA = lp / max(d, 1e-4);
     float hov = (uHover==8.0+float(oi)) ? 1.0 : 0.0;
-    vec3 c = hue*(1.20 + 0.40*max(-nA.x,0.0)) + hue*ring*0.75 + mix(ca,cb,0.5)*0.35;
-    c += vec3(1.0)*(0.06 + 0.12*hov);
-    return c*(1.05 + hov*0.9);
+    float pulse = 0.55 + 0.45*sin(t*2.2 + float(oi)*1.3);
+    vec3 coreC = mix(ca, cb, 0.35 + 0.20*sin(t*1.4 + float(oi)));
+    coreC *= (0.70 + 0.45*pulse) * (0.80 + 0.40*max(-nA.x, 0.0));
+    float lon = atan(q.z, q.x);
+    float mer = atan(q.z, q.y);
+    float tick = max(
+      smoothstep(0.12, 0.0, abs(fract(lon*1.27324 - t*(0.40+hov*0.85))-0.5)-0.40),
+      smoothstep(0.12, 0.0, abs(fract(mer*1.27324 + t*(0.28+hov*0.55))-0.5)-0.40)
+    );
+    vec3 ringC = ca * (0.72 + tick*0.85 + hov*0.35);
+    vec3 c = mix(ringC, coreC, coreM);
+    c += vec3(1.0)*(0.03 + 0.10*hov)*coreM;
+    return c*(1.0 + hov*0.65);
   }
 
   /* LED puri: niente normali/AO/ombre */
@@ -1596,26 +1709,64 @@ vec3 shade(vec3 pos, vec3 rd, float mid){
   if(mid==24.0){
     float hovO = uHover==3.0?1.0:0.0;
     vec3 q = octToLocal(pos-OCT_C);
-    vec3 alb = mix(vec3(0.52,0.18,0.86), vec3(0.30,0.10,0.68), clamp(q.y*6.0+0.2,0.,1.));
-    vec3 hq = q - vec3(0.,0.085+0.008*sin(t*2.0),0.);
-    float eyeL = length(hq-vec3(0.026,0.012,0.052));
-    float eyeR = length(hq-vec3(-0.026,0.012,0.052));
+    vec3 hc = q - octHeadC(t);
+    vec3 alb = vec3(0.08, 0.08, 0.09);
+    float gloss = 0.55;
     vec3 emis = vec3(0.0);
-    if(eyeL < 0.007 || eyeR < 0.007) alb = vec3(0.02);
-    else if(eyeL < 0.016 || eyeR < 0.016) alb = vec3(0.95);
-    if(focO>0.5){
-      float circuit = smoothstep(0.04,0.0,abs(fract(atan(q.z,q.x)*4.0 + t*1.5)-0.5)-0.42);
-      emis += vec3(0.55,0.3,1.0)*circuit*(0.5+0.5*sin(t*7.0+q.y*40.0))*0.85;
-      emis += vec3(0.4,0.85,1.0)*pow(fres,1.5)*(0.7+0.3*sin(t*5.0))*0.9;
-      if(eyeL < 0.016 || eyeR < 0.016) emis += vec3(0.3,0.9,1.0)*(0.4+0.6*sin(t*8.0));
+
+    vec2 fp = vec2(hc.x, hc.y + 0.004);
+    float faceM = (1.0 - smoothstep(0.88, 1.06, length(fp/vec2(0.044, 0.040))))
+                * smoothstep(-0.008, 0.022, hc.z);
+    alb = mix(alb, vec3(0.94, 0.72, 0.54), faceM);
+    emis += vec3(0.94, 0.72, 0.54) * faceM * 0.06;
+
+    /* occhi: sclera bianca ovale + pupilla tonda, niente cuore */
+    vec2 eL = (fp - vec2(-0.028, 0.008))/vec2(0.010, 0.013);
+    vec2 eR = (fp - vec2( 0.028, 0.008))/vec2(0.010, 0.013);
+    float e = min(length(eL), length(eR));
+    if(e < 1.05 && hc.z > 0.02){
+      alb = vec3(0.98, 0.96, 0.93);
+      emis = vec3(0.10, 0.09, 0.08);
+      vec2 pL = (fp - vec2(-0.028, 0.007))/0.0078;
+      vec2 pR = (fp - vec2( 0.028, 0.007))/0.0078;
+      if(min(length(pL), length(pR)) < 1.0){
+        alb = vec3(0.22, 0.10, 0.08);
+        emis = vec3(0.0);
+      }
     }
-    vec3 L = normalize(vec3(0.3,0.8,-0.4));
-    float dif = max(dot(n, L),0.0);
-    vec3 c = alb*(0.22+0.55*dif) + emis;
-    c += vec3(0.55,0.32,0.80)*fres*0.25;
-    c += alb*hovO*0.9;
-    c += stripLighting(pos, n, 1.0)*alb*1.4;
-    if(focO>0.5) c *= 1.1+0.15*sin(t*4.5);
+    if(length((fp - vec2(0.0, -0.014))/vec2(0.0048, 0.0040)) < 1.0 && faceM > 0.35)
+      alb = vec3(0.38, 0.14, 0.10);
+    {
+      vec2 sm = fp - vec2(0.0, -0.018);
+      float smile = abs(length(sm) - 0.011);
+      if(smile < 0.0022 && sm.y < 0.002 && abs(sm.x) < 0.013 && faceM > 0.35)
+        alb = vec3(0.24, 0.10, 0.08);
+    }
+
+    vec3 ta, tm, tt, tp;
+    octTailPts(t, ta, tm, tt, tp);
+    for(int i=0;i<6;i++){
+      if(length(q - octCupP(tm, tt, i)) < 0.0044){
+        alb = vec3(0.38, 0.78, 0.72);
+        emis += vec3(0.06, 0.16, 0.14);
+      }
+    }
+    if(length(q - octDropP(tp)) < 0.007){
+      alb = vec3(0.45, 0.82, 0.95);
+      gloss = 0.95;
+      emis += vec3(0.08, 0.18, 0.26);
+    }
+    if(focO>0.5){
+      emis += vec3(0.35, 0.82, 1.0)*pow(fres, 1.4)*0.28;
+    }
+    vec3 L = normalize(vec3(-0.15, 0.75, 0.55));
+    float dif = max(dot(n, L), 0.0);
+    float wrap = max(dot(n, L)*0.5+0.5, 0.0);
+    vec3 c = alb*(0.22 + 0.52*dif + 0.28*wrap) + emis;
+    c += vec3(0.55, 0.62, 0.75)*fres*gloss*0.40;
+    c += alb*hovO*0.55;
+    c += stripLighting(pos, n, 1.0)*alb*1.7;
+    if(focO>0.5) c *= 1.04;
     return c;
   }
 

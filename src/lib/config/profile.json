@@ -1,0 +1,263 @@
+{
+  "cvUrl": "https://dl.dropboxusercontent.com/scl/fi/u7da710482r8jhbvg78hc/Lorenzo-Valente-CV-English.pdf?rlkey=yj557vvpvzyk4162b2y19aonj&dl=1",
+  "bio": {
+    "archiveId": "2308-LV",
+    "status": "active",
+    "name": "Lorenzo Valente",
+    "specialization": {
+      "en": "Software Engineer",
+      "it": "Ingegnere del software"
+    },
+    "description": {
+      "en": "Extensive background in Software Design and Development, including experience in Game Development, AR and VR, 3D Math and Real-time Physics, Scientific Visualization, Full-stack Web Design, Network Coding, Neural Networks and Evolutionary Algorithms Design. My personal interests include technology, design, web, movies, music, videogames, cooking, traveling.",
+      "it": "Ampia esperienza in progettazione e sviluppo software: videogiochi, AR e VR, matematica 3D e fisica in tempo reale, visualizzazione scientifica, web full-stack, programmazione di rete, reti neurali e algoritmi evolutivi. Interessi personali: tecnologia, design, web, cinema, musica, videogiochi, cucina, viaggi."
+    }
+  },
+  "companies": [
+    {
+      "id": "arkadium",
+      "years": 1,
+      "colorA": [0.9, 0.12, 0.12],
+      "colorB": [0.96, 0.95, 0.94],
+      "name": "Arkadium",
+      "role": {
+        "en": "Senior Game Developer",
+        "it": "Sviluppatore di videogiochi senior"
+      },
+      "period": {
+        "en": "2026 — present",
+        "it": "2026 — in corso"
+      },
+      "description": {
+        "en": "Development of web-based games.",
+        "it": "Sviluppo di videogiochi web."
+      },
+      "projects": [
+        {
+          "id": "microsoft-solitaire-collection",
+          "name": "Microsoft Solitaire Collection",
+          "url": "https://apps.microsoft.com/detail/9wzdncrfhwd2?hl=it-IT&gl=IT",
+          "imageUrl": "https://store-images.s-microsoft.com/image/apps.28398.9007199266246761.b535414e-52ea-483a-af68-de38ef6ba67a.c9e48a38-2b9f-4a26-9e8a-860467751481",
+          "description": {
+            "en": "The most played Solitaire suite in history: Klondike, Spider, FreeCell, TriPeaks and Pyramid, plus daily challenges, events and extra casual games, published by Xbox Game Studios.",
+            "it": "La suite di Solitario più giocata al mondo: Klondike, Spider, FreeCell, TriPeaks e Pyramid, con sfide quotidiane, eventi e altri casual game, pubblicata da Xbox Game Studios."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tiny-bull-studios",
+      "years": 5,
+      "colorA": [0.85, 0.08, 0.08],
+      "colorB": [0.04, 0.03, 0.03],
+      "name": "Tiny Bull Studios",
+      "role": {
+        "en": "Senior Game Developer",
+        "it": "Sviluppatore di videogiochi senior"
+      },
+      "period": {
+        "en": "2021 — 2026",
+        "it": "2021 — 2026"
+      },
+      "description": {
+        "en": "Worked on The Lonesome Guild, an action RPG published by Don't Nod Entertainment and released on PC, PS5 and Xbox. Worked on gamification and Industry 4.0 business projects. Experience with Unity, UI Toolkit, DOTS, Odin, WebGL.",
+        "it": "Ho lavorato su The Lonesome Guild, action RPG pubblicato da Don't Nod Entertainment e uscito su PC, PS5 e Xbox. Progetti di gamification e Industria 4.0. Esperienza con Unity, UI Toolkit, DOTS, Odin, WebGL."
+      },
+      "projects": [
+        {
+          "id": "the-lonesome-guild",
+          "name": "The Lonesome Guild",
+          "url": "https://tinybullstudios.com/games/the-lonesome-guild/",
+          "imageUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1486450/header.jpg",
+          "description": {
+            "en": "Single-player top-down action RPG about togetherness: recruit a party of six, switch characters in combat and exploration, and restore hope to a world consumed by loneliness. Published by Don't Nod.",
+            "it": "Action RPG single-player in vista dall'alto sull'unione: recluta un party di sei, cambia personaggio in combattimento ed esplorazione e riporta speranza in un mondo divorato dalla solitudine. Pubblicato da Don't Nod."
+          }
+        },
+        {
+          "id": "omen-exitio-hunger",
+          "name": "Omen Exitio: Hunger",
+          "url": "https://tinybullstudios.com/games/omen-exitio-hunger-game-book/",
+          "imageUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1466520/header.jpg",
+          "description": {
+            "en": "Lovecraftian investigative game-book set in 1927 New York, starting from the real disappearance of Billy Gaffney: gather clues, interview witnesses and navigate a decaying occult city.",
+            "it": "Game-book investigativo lovecraftiano ambientato nella New York del 1927, a partire dalla scomparsa reale di Billy Gaffney: raccogli indizi, interroga i testimoni e attraversa una città occultista in rovina."
+          }
+        },
+        {
+          "id": "foodland",
+          "name": "Foodland",
+          "url": "https://gamethinkers.it/portfolio/foodland-un-nuovo-format-educativo/",
+          "imageUrl": "https://gamethinkers.it/wp-content/uploads/Map_Characters.jpg",
+          "description": {
+            "en": "Game-based learning platform for Fondazione Veronesi: thematic islands on nutrition, cooking, sustainability and movement for primary schools, already used by thousands of pupils.",
+            "it": "Piattaforma di game-based learning per Fondazione Veronesi: isole tematiche su alimentazione, cottura, sostenibilità e movimento per le scuole primarie, già usata da migliaia di alunni."
+          }
+        },
+        {
+          "id": "ross-sgrammanebbia",
+          "name": "Ross e la Sgrammanebbia",
+          "url": "https://gamethinkers.it/portfolio/ross-e-la-sgrammanebbia-videogioco-educativo/",
+          "imageUrl": "https://gamethinkers.it/wp-content/uploads/GameThinkers-portfolio-Ross-e-la-Sgrammanebbia.jpg",
+          "description": {
+            "en": "Educational game for Deascuola (Mondadori) that teaches Italian grammar in class: customizable exercises, unlock codes for teachers, and one of the first applied games of its kind in Italy.",
+            "it": "Videogioco didattico per Deascuola (Mondadori) che insegna la grammatica italiana in classe: esercizi personalizzabili, codici di sblocco per i docenti e uno dei primi applied game di questo tipo in Italia."
+          }
+        },
+        {
+          "id": "ereal-museo-zoologia",
+          "name": "e-Real Museo di Zoologia di Roma",
+          "url": "https://gamethinkers.it/portfolio/realta-estesa-museo-di-zoologia-di-roma/",
+          "imageUrl": "https://gamethinkers.it/wp-content/uploads/GameThinkers-portfolio-e-Real-Museo-di-Zoologia-di-Roma-sala-arrigoni.jpg",
+          "description": {
+            "en": "Extended-reality rooms for the Zoology Museum of Rome: gesture and voice interaction with multimedia exhibits and a 3D avatar of Count Arrigoni, the museum's founder.",
+            "it": "Sale in realtà estesa per il Museo di Zoologia di Roma: interazione gestuale e vocale con contenuti multimediali e un avatar 3D del conte Arrigoni, fondatore del museo."
+          }
+        }
+      ]
+    },
+    {
+      "id": "anothereality",
+      "years": 2,
+      "colorA": [0.48, 0.18, 0.92],
+      "colorB": [0.12, 0.28, 0.9],
+      "name": "AnotheReality",
+      "role": {
+        "en": "XR Software Developer",
+        "it": "Sviluppatore software XR"
+      },
+      "period": {
+        "en": "2019 — 2021",
+        "it": "2019 — 2021"
+      },
+      "description": {
+        "en": "Worked on Unity and Unreal Engine projects for immersive XR business solutions, VR and mobile games. Experience with Oculus Quest/Rift, HTC Vive and Kinect. Close cooperation with Microsoft, Luxottica, MSC, Trenitalia, ENI and Universal Music Group.",
+        "it": "Progetti Unity e Unreal Engine per soluzioni XR immersive, VR e videogiochi mobile. Esperienza con Oculus Quest/Rift, HTC Vive e Kinect. Collaborazione stretta con Microsoft, Luxottica, MSC, Trenitalia, ENI e Universal Music Group."
+      },
+      "projects": [
+        {
+          "id": "beautiful-inside",
+          "name": "Beautiful Inside",
+          "url": "https://www.anothereality.io/it/case-studies/beautiful-inside-body-tracking-experience/",
+          "imageUrl": "https://www.anothereality.io/wp-content/uploads/2023/06/Beautiful-inside.jpg",
+          "description": {
+            "en": "Interactive body-tracking installation for DOC Generici at Meeting di Rimini 2019: Kinect + Unity overlay anatomical systems on the visitor's silhouette through a dark tunnel.",
+            "it": "Installazione interattiva di body tracking per DOC Generici al Meeting di Rimini 2019: Kinect + Unity sovrappongono gli apparati del corpo alla silhouette del visitatore in un tunnel buio."
+          }
+        },
+        {
+          "id": "the-sea-rider",
+          "name": "The Sea Rider",
+          "url": "https://www.anothereality.io/it/case-studies/the-sea-rider-msc-advergame/",
+          "imageUrl": "https://www.anothereality.io/wp-content/uploads/2023/06/The_Sea_Rider_banner.jpg",
+          "description": {
+            "en": "Mobile advergame for MSC: command a cargo ship, avoid wildlife and coasts, use currents and biofuel, and learn maritime sustainability. 50k+ downloads.",
+            "it": "Advergame mobile per MSC: comanda una nave cargo, evita fauna e coste, usa correnti e biofuel e impari la sostenibilità marittima. Oltre 50 mila download."
+          }
+        },
+        {
+          "id": "terna-quota",
+          "name": "Simulatore VR operazioni in quota",
+          "url": "https://www.anothereality.io/it/case-studies/simulazione-operazioni-quota/",
+          "imageUrl": "https://www.anothereality.io/wp-content/uploads/2023/05/exp2_10-1024x544.png",
+          "description": {
+            "en": "VR training hub for Terna high-altitude electrical work: realistic procedures on HTC Vive Pro, built in Unity, so operators can practice dangerous tasks safely.",
+            "it": "Hub di training VR per Terna sulle operazioni in quota: procedure realistiche su HTC Vive Pro, sviluppato in Unity, per esercitarsi in sicurezza su compiti pericolosi."
+          }
+        },
+        {
+          "id": "mr-fini",
+          "name": "MR. FINI, The Experience",
+          "url": "https://www.anothereality.io/it/case-studies/mr-fini-the-experience/",
+          "imageUrl": "https://www.anothereality.io/wp-content/uploads/2022/12/mrfini.jpg",
+          "description": {
+            "en": "AR app for Guè Pequeno's album launch with Island Records: step into the cover hotel room, unlock exclusive tracks and pre-order. 35k+ downloads, #1 on the App Store.",
+            "it": "App AR per il lancio dell'album di Guè Pequeno con Island Records: entra nella stanza d'albergo di copertina, sblocca brani inediti e preordina. Oltre 35 mila download, #1 sull'App Store."
+          }
+        }
+      ]
+    },
+    {
+      "id": "illogic",
+      "years": 3,
+      "colorA": [0.88, 0.16, 0.1],
+      "colorB": [0.42, 0.22, 0.08],
+      "name": "Illogic",
+      "role": {
+        "en": "VR and AR Analyst Programmer",
+        "it": "Programmatore analista VR e AR"
+      },
+      "period": {
+        "en": "2016 — 2019",
+        "it": "2016 — 2019"
+      },
+      "description": {
+        "en": "Worked on a proprietary virtual training platform based on open-source C++ technologies, OpenSceneGraph, UWP and OpenVR. Designed mixed and virtual reality user interfaces. Actively collaborated on the A4BLUE European project.",
+        "it": "Piattaforma proprietaria di virtual training su C++ open-source, OpenSceneGraph, UWP e OpenVR. Progettazione di interfacce mixed e virtual reality. Collaborazione attiva al progetto europeo A4BLUE."
+      },
+      "projects": [
+        {
+          "id": "xr-star",
+          "name": "XR-STAR",
+          "url": "https://illogic.xyz/case/xr-star-virtual-reality-platform/",
+          "imageUrl": "https://illogic.xyz/wp-content/uploads/2019/01/vr-star-01.jpg",
+          "description": {
+            "en": "Immersive VR operations-training platform for Oil & Gas: photorealistic plant twins for construction preview, crew training, process simulation and HSE risk management.",
+            "it": "Piattaforma VR di operations training per Oil & Gas: gemelli fotorealistici di impianti per anteprima di costruzione, formazione, simulazione di processo e gestione del rischio HSE."
+          }
+        },
+        {
+          "id": "a4blue",
+          "name": "A4BLUE",
+          "url": "https://illogic.xyz/case/a4blue/",
+          "imageUrl": "https://illogic.xyz/wp-content/uploads/2019/02/a4blue.jpg",
+          "description": {
+            "en": "EU R&D project on human-automation interaction. Illogic developed the VR and AR applications for adaptive, multimodal workplace assistance.",
+            "it": "Progetto di R&S europeo sull'interazione uomo-automazione. Illogic ha sviluppato le applicazioni VR e AR per l'assistenza adattiva e multimodale in ambiente di lavoro."
+          }
+        },
+        {
+          "id": "mogar",
+          "name": "MOGAR",
+          "url": "https://illogic.xyz/case/morgar-vr/",
+          "imageUrl": "https://illogic.xyz/wp-content/uploads/2019/02/morgar-03.jpg",
+          "description": {
+            "en": "Immersive VR simulator of a molding press, paired with a fluid-dynamics engine and a machine-learning experiential database. Holograms of the molded part can be inspected in AR on HoloLens.",
+            "it": "Simulatore VR immersivo di una pressa di stampaggio, affiancato a un motore fluidodinamico e a un database esperienziale con machine learning. Gli ologrammi del pezzo stampato si ispezionano in AR su HoloLens."
+          }
+        }
+      ]
+    },
+    {
+      "id": "unimol",
+      "years": 3,
+      "colorA": [0.18, 0.72, 0.22],
+      "colorB": [0.95, 0.82, 0.08],
+      "name": "UNIMOL",
+      "role": {
+        "en": "Full-stack Web Designer",
+        "it": "Web designer full-stack"
+      },
+      "period": {
+        "en": "2013 — 2016",
+        "it": "2013 — 2016"
+      },
+      "description": {
+        "en": "Created the State Forestry Service LifeMIPP project website. Full client-side and server-side design and production with HTML5, JavaScript, Google Maps API and JSP/Servlet.",
+        "it": "Realizzazione del sito del progetto LifeMIPP del Corpo Forestale dello Stato. Design e produzione full-stack con HTML5, JavaScript, Google Maps API e JSP/Servlet."
+      },
+      "projects": [
+        {
+          "id": "lifemipp",
+          "name": "LifeMIPP / InNat",
+          "url": "https://lifemipp.eu/",
+          "imageUrl": "https://www.innat.unimol.it/wp-content/uploads/2021/02/Logo-300x70.png",
+          "description": {
+            "en": "Citizen-science platform for monitoring EU-protected insects (LIFE MIPP, then InNat and Start2000): public reports, mapping and data later merged into Italy's National Biodiversity Network.",
+            "it": "Piattaforma di citizen science per il monitoraggio di insetti protetti a livello europeo (LIFE MIPP, poi InNat e Start2000): segnalazioni, mappatura e dati poi confluiti nel Network Nazionale della Biodiversità."
+          }
+        }
+      ]
+    }
+  ]
+}

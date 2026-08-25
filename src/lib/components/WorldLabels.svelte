@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { LocaleData } from '$lib/i18n';
   import type { CameraPose } from '$lib/webgl/camera';
-  import { orbPosJS, orbRadius } from '$lib/webgl/orbs';
+  import { BRD_C, OCT_C, TAB_C, orbPosJS, orbRadius } from '$lib/webgl/orbs';
   import { projectWorldToScreen } from '$lib/webgl/project';
   import { socialPosJS } from '$lib/webgl/socials';
   import type { CompanyConfig, SceneConfig, SocialConfig, Vec3 } from '$lib/webgl/types';
@@ -32,10 +32,6 @@
     hidden = false
   }: Props = $props();
 
-  const TAB_C: Vec3 = [-0.7, 0.83, 0.8];
-  const BRD_C: Vec3 = [0.58, 0.805, 0.82];
-  const OCT_C: Vec3 = [1.12, 0.8, 1.1];
-
   interface LabelItem {
     id: string;
     text: string;
@@ -58,9 +54,9 @@
       out.push({ id, text, x: s.x, y: s.y, depth: s.depth, visible: s.visible });
     };
 
-    push('bio', strings.labels.bio, above(TAB_C, 0.14));
+    push('bio', strings.labels.bio, above(TAB_C, 0.18));
     push('chess', strings.labels.chess, above(BRD_C, 0.12));
-    push('github', strings.labels.github, above(OCT_C, 0.2));
+    push('github', strings.labels.github, above(OCT_C, 0.30));
 
     for (let i = 0; i < companies.length; i++) {
       const c = companies[i];
@@ -72,7 +68,7 @@
     for (let i = 0; i < socials.length; i++) {
       const s = socials[i];
       const name = strings.labels.socials[s.id as keyof typeof strings.labels.socials] ?? s.id;
-      push(`social-${s.id}`, name, above(socialPosJS(i, time), 0.12));
+      push(`social-${s.id}`, name, above(socialPosJS(i, time), 0.14));
     }
 
     return out.sort((a, b) => b.depth - a.depth);

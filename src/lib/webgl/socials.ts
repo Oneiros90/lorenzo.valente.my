@@ -2,9 +2,9 @@ import type { Vec3 } from './types';
 import { SOCIAL_PICK_BASE } from './picks';
 
 /**
- * Right-wall social orbs — MUST sit in front of shelves toward room (-X).
- * Shelves hug the wall (~x 3.43–3.67); orbs at x≈3.18 so camera rays hit
- * the sphere before any shelf slab.
+ * Right-wall social beacons — MUST sit in front of shelves toward room (-X).
+ * Shelves hug the wall (~x 3.43–3.67); beacons at x≈3.18 so camera rays hit
+ * the pick sphere (covers core + gyro rings) before any shelf slab.
  */
 const SOCIAL_BASE: Vec3[] = [
   [3.18, 2.54, -1.5],

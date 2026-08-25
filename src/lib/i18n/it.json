@@ -43,6 +43,7 @@
       "base": "Base operativa",
       "status": "Stato",
       "statusActive": "ATTIVO",
+      "downloadCv": "Scarica CV",
       "note": "Trasmissione criptata · rete coloniale saturniana"
     },
     "chess": {
@@ -87,6 +88,7 @@
       "duration": "Durata",
       "year": "anno",
       "years": "anni",
+      "projects": "Progetti",
       "note": "Archivio lavorativo · rete coloniale"
     }
   },

@@ -3,42 +3,42 @@
     "id": "facebook",
     "url": "https://www.facebook.com/lorenzo.valente",
     "colorA": [0.09, 0.47, 0.95],
-    "colorB": [0.35, 0.65, 1.0]
+    "colorB": [0.04, 0.16, 0.38]
   },
   {
     "id": "instagram",
     "url": "https://www.instagram.com/oneiros90",
-    "colorA": [0.9, 0.25, 0.55],
-    "colorB": [1.0, 0.55, 0.2]
+    "colorA": [0.76, 0.19, 0.51],
+    "colorB": [0.32, 0.12, 0.48]
   },
   {
     "id": "linkedin",
     "url": "https://www.linkedin.com/in/valentelorenzo",
-    "colorA": [0.04, 0.4, 0.76],
-    "colorB": [0.25, 0.65, 0.95]
+    "colorA": [0.04, 0.40, 0.76],
+    "colorB": [0.02, 0.14, 0.32]
   },
   {
     "id": "telegram",
     "url": "https://t.me/oneiros90",
-    "colorA": [0.15, 0.65, 0.9],
-    "colorB": [0.4, 0.85, 1.0]
+    "colorA": [0.13, 0.55, 0.78],
+    "colorB": [0.05, 0.22, 0.36]
   },
   {
     "id": "discord",
     "url": "https://discord.com/users/oneiros90",
-    "colorA": [0.35, 0.4, 0.95],
-    "colorB": [0.55, 0.5, 1.0]
+    "colorA": [0.35, 0.40, 0.95],
+    "colorB": [0.12, 0.12, 0.14]
   },
   {
     "id": "youtube",
     "url": "https://www.youtube.com/@lorenzovalente",
-    "colorA": [0.95, 0.12, 0.12],
-    "colorB": [1.0, 0.4, 0.35]
+    "colorA": [0.80, 0.08, 0.08],
+    "colorB": [0.06, 0.05, 0.05]
   },
   {
     "id": "mail",
     "url": "mailto:lorenzo@valente.my",
-    "colorA": [0.4, 0.85, 0.95],
-    "colorB": [0.7, 0.95, 1.0]
+    "colorA": [0.22, 0.48, 0.52],
+    "colorB": [0.12, 0.16, 0.20]
   }
 ]

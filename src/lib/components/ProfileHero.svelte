@@ -20,7 +20,7 @@
 <div class="profile-hero">
   <a class="profile-avatar" href={url || undefined} target="_blank" rel="noopener">
     {#if avatar}
-      <img src={avatar} alt={displayName} />
+      <img src={avatar} alt={displayName} referrerpolicy="no-referrer" />
     {/if}
   </a>
   <div class="profile-identity">

@@ -1,27 +1,25 @@
 import { lookBasis, type CameraPose } from './camera';
-import { orbPosJS, orbRadius } from './orbs';
+import { BRD_C, OCT_C, TAB_C, orbPosJS, orbRadius } from './orbs';
 import { SOCIAL_ORB_RADIUS, socialPosJS } from './socials';
 import { MAX_COMPANY_ORBS, SOCIAL_PICK_BASE, companyPickId } from './picks';
 import type { CompanyConfig, PickId, SceneConfig, SocialConfig, Vec3 } from './types';
 
-export { orbPosJS, orbRadius };
+export { BRD_C, OCT_C, TAB_C, orbPosJS, orbRadius };
 
-const TAB_C: Vec3 = [-0.7, 0.83, 0.8];
 const TAB_HALF: Vec3 = [0.218, 0.03, 0.158];
 const TAB_TILT = 0.5;
 
-const BRD_C: Vec3 = [0.58, 0.805, 0.82];
 const BRD_HALF: Vec3 = [0.248, 0.026, 0.248];
 const BRD_PIECE_TOP = 0.1;
-
-const OCT_C: Vec3 = [1.12, 0.8, 1.1];
 const OCT_YAW = Math.atan2(0.0 - OCT_C[0], 2.1 - OCT_C[2]);
-const OCT_BODY_LOCAL: Vec3 = [0, 0.085, 0];
-const OCT_HEAD_R = 0.1;
-const OCT_LEG_R = 0.026;
-const OCT_LEG_BASE: Vec3 = [0.055, 0.038, 0];
-const OCT_LEG_MID: Vec3 = [0.09, 0.018, 0];
-const OCT_LEG_TIP: Vec3 = [0.112, 0.012, 0];
+const OCT_PICK: { p: Vec3; r: number }[] = [
+  { p: [0, 0.16, 0.01], r: 0.085 },
+  { p: [-0.07, 0.25, 0], r: 0.036 },
+  { p: [0.07, 0.25, 0], r: 0.036 },
+  { p: [0, 0.06, 0], r: 0.08 },
+  { p: [-0.08, 0.12, 0], r: 0.048 },
+  { p: [-0.08, 0.17, 0.02], r: 0.04 }
+];
 
 function dot3(a: Vec3, b: Vec3): number {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -96,16 +94,9 @@ function hitBoard(ro: Vec3, rd: Vec3): number {
 }
 
 function hitOctopus(ro: Vec3, rd: Vec3): number {
-  let best = hitSphere(ro, rd, octWorldFromLocal(OCT_BODY_LOCAL), OCT_HEAD_R);
-  for (let i = 0; i < 6; i++) {
-    const ai = (i * Math.PI * 2) / 6 + Math.PI;
-    const ca = Math.cos(ai);
-    const sa = Math.sin(ai);
-    const parts: Vec3[] = [OCT_LEG_BASE, OCT_LEG_MID, OCT_LEG_TIP];
-    for (const p of parts) {
-      const local: Vec3 = [ca * p[0], p[1], sa * p[0]];
-      best = Math.min(best, hitSphere(ro, rd, octWorldFromLocal(local), OCT_LEG_R));
-    }
+  let best = Infinity;
+  for (const { p, r } of OCT_PICK) {
+    best = Math.min(best, hitSphere(ro, rd, octWorldFromLocal(p), r));
   }
   return best;
 }

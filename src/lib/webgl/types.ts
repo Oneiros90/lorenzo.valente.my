@@ -1,14 +1,28 @@
 export type Vec3 = [number, number, number];
 
+export interface LocalizedText {
+  en: string;
+  it: string;
+}
+
+export interface WorkProject {
+  id: string;
+  name: string;
+  url: string;
+  imageUrl: string | null;
+  description: LocalizedText;
+}
+
 export interface CompanyConfig {
   id: string;
   years: number;
   colorA: Vec3;
   colorB: Vec3;
   name: string;
-  role: string;
-  period: string;
-  description: string;
+  role: LocalizedText;
+  period: LocalizedText;
+  description: LocalizedText;
+  projects: WorkProject[];
 }
 
 export interface ProjectConfig {
@@ -38,8 +52,14 @@ export interface BioConfig {
   archiveId: string;
   status: string;
   name: string;
-  specialization: string;
-  description: string;
+  specialization: LocalizedText;
+  description: LocalizedText;
+}
+
+export interface ProfileConfig {
+  cvUrl: string;
+  bio: BioConfig;
+  companies: CompanyConfig[];
 }
 
 export type ChessResult = 'win' | 'draw' | 'loss';

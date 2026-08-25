@@ -43,6 +43,7 @@
       "base": "Base of operations",
       "status": "Status",
       "statusActive": "ACTIVE",
+      "downloadCv": "Download CV",
       "note": "Encrypted transmission · saturnian colonial network"
     },
     "chess": {
@@ -87,6 +88,7 @@
       "duration": "Duration",
       "year": "year",
       "years": "years",
+      "projects": "Projects",
       "note": "Work archive · colonial network"
     }
   },

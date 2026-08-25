@@ -3,7 +3,7 @@
   import type { LocaleData } from '$lib/i18n';
   import { displayUrl, formatMonthYear } from '$lib/format';
   import ProfileHero from '$lib/components/ProfileHero.svelte';
-  import ProjectIcon from '$lib/components/ProjectIcon.svelte';
+  import WorkProjectCard from '$lib/components/WorkProjectCard.svelte';
 
   interface Props {
     open: boolean;
@@ -62,26 +62,18 @@
     {:else}
       <div class="project-list">
         {#each projects as project (project.id)}
-          <article class="project-card">
-            <ProjectIcon src={project.imageUrl} name={project.name} />
-            <div class="project-body">
-              <h3>
-                <a href={project.url} target="_blank" rel="noopener">◈ {project.name}</a>
-              </h3>
-              <div class="desc">{project.description || p.noDescription}</div>
-              <div class="meta">
-                <span>{p.stars} <b>{project.stars}</b></span>
-                <span>{p.lang} <b>{project.lang}</b></span>
-              </div>
-              {#if project.tags.length}
-                <div class="tags">
-                  {#each project.tags as tag (tag)}
-                    <span>{tag}</span>
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          </article>
+          <WorkProjectCard
+            name={project.name}
+            url={project.url}
+            description={project.description}
+            imageUrl={project.imageUrl}
+            noDescription={p.noDescription}
+            stars={project.stars}
+            lang={project.lang}
+            tags={project.tags}
+            starsLabel={p.stars}
+            langLabel={p.lang}
+          />
         {/each}
       </div>
     {/if}
