@@ -108,18 +108,21 @@
 
 	.opening {
 		position: relative;
-		align-items: end;
+		align-items: start;
+		align-content: start;
 		min-height: calc(100svh - var(--nav-h) - 9rem);
 	}
 
 	.portrait-layer {
 		position: relative;
 		z-index: 1;
-		grid-column: 1 / -1;
-		grid-row: 1 / 3;
+		grid-column: 6 / -1;
+		grid-row: 2;
+		align-self: start;
 		justify-self: end;
-		width: min(56vw, 24rem);
-		margin-right: -6%;
+		width: min(52vw, 16rem);
+		min-width: 0;
+		margin-top: var(--space-2);
 		opacity: 0.82;
 		pointer-events: none;
 	}
@@ -143,7 +146,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
-		font-size: clamp(3.3rem, 15vw, 10rem);
+		font-size: clamp(3.1rem, 14vw, 5.5rem);
 		font-weight: 500;
 		letter-spacing: -0.075em;
 		line-height: 0.77;
@@ -227,6 +230,11 @@
 			overflow: visible;
 		}
 
+		.opening {
+			align-items: end;
+			align-content: stretch;
+		}
+
 		.name {
 			font-size: clamp(6rem, 11.4vw, 12.8rem);
 			line-height: 0.74;
@@ -245,6 +253,7 @@
 			grid-row: 1 / 5;
 			width: min(38vw, 36rem);
 			align-self: center;
+			justify-self: end;
 			margin: 0 -4% 0 0;
 			opacity: 0.82;
 		}
