@@ -1,11 +1,15 @@
 import it from './it.json';
 import en from './en.json';
+import siteIt from './site/it.json';
+import siteEn from './site/en.json';
 import sceneConfig from '../config/scene.json';
 
 export type Locale = 'it' | 'en';
 export type LocaleData = typeof it;
+export type SiteLocaleData = typeof siteEn;
 
 const catalogs: Record<Locale, LocaleData> = { it, en };
+const siteCatalogs: Record<Locale, SiteLocaleData> = { it: siteIt, en: siteEn };
 
 export function getDefaultLocale(): Locale {
   const params = new URLSearchParams(globalThis.location?.search ?? '');
@@ -18,6 +22,10 @@ export function getDefaultLocale(): Locale {
 
 export function getLocaleData(locale: Locale): LocaleData {
   return catalogs[locale];
+}
+
+export function getSiteStrings(locale: Locale): SiteLocaleData {
+  return siteCatalogs[locale];
 }
 
 export function t(template: string, vars: Record<string, string | number> = {}): string {

@@ -104,6 +104,10 @@ function isBadge(src: string): boolean {
   return BADGE_RE.test(src) || src.startsWith('data:');
 }
 
+function isGenericCover(src: string): boolean {
+  return /opengraph\.githubassets\.com|socialify\.git\.ci|github-readme-stats/i.test(src);
+}
+
 export function firstReadmeImageSrc(markdown: string): string | null {
   const found: { index: number; src: string }[] = [];
   for (const re of [MD_IMG, HTML_IMG]) {
@@ -116,7 +120,7 @@ export function firstReadmeImageSrc(markdown: string): string | null {
   }
   found.sort((a, b) => a.index - b.index);
   for (const item of found) {
-    if (!isBadge(item.src)) return item.src;
+    if (!isBadge(item.src) && !isGenericCover(item.src)) return item.src;
   }
   return null;
 }

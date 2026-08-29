@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "title": "Lorenzo Valente",
+    "description": "Software engineer. Games, XR, real-time graphics, full-stack web."
+  },
+  "nav": {
+    "index": "Index",
+    "bio": "Biography",
+    "work": "Work",
+    "projects": "Projects",
+    "chess": "Chess",
+    "contact": "Contact",
+    "enceladus": "Enceladus",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "langEn": "EN",
+    "langIt": "IT",
+    "menu": "Menu",
+    "close": "Close",
+    "skip": "Skip to content",
+    "progress": "Reading progress"
+  },
+  "bio": {
+    "index": "00",
+    "kicker": "Biography",
+    "role": "Role",
+    "cv": "Download CV",
+    "born": "Date of birth",
+    "place": "Place",
+    "workplace": "Workplace"
+  },
+  "work": {
+    "index": "01",
+    "kicker": "Work",
+    "role": "Role",
+    "period": "Period",
+    "duration": "Duration",
+    "year": "year",
+    "years": "years",
+    "projects": "Selected work",
+    "chronology": "Career"
+  },
+  "projects": {
+    "index": "02",
+    "kicker": "Projects",
+    "stars": "Stars",
+    "language": "Language",
+    "followers": "Followers",
+    "joined": "Joined",
+    "repos": "Repositories",
+    "empty": "No public repositories yet.",
+    "error": "GitHub is temporarily unavailable.",
+    "noDescription": "No description provided.",
+    "sequence": "Selected repositories",
+    "open": "Open repository"
+  },
+  "chess": {
+    "index": "03",
+    "kicker": "Chess.com",
+    "rapid": "Rapid",
+    "blitz": "Blitz",
+    "bullet": "Bullet",
+    "best": "Peak",
+    "games": "Games",
+    "winRate": "Win rate",
+    "followers": "Followers",
+    "league": "League",
+    "location": "Location",
+    "joined": "Joined",
+    "premium": "Premium",
+    "lastGame": "Last game",
+    "empty": "No recent games.",
+    "error": "Chess.com is temporarily unavailable.",
+    "win": "Win",
+    "loss": "Loss",
+    "draw": "Draw",
+    "profile": "Open Chess.com profile",
+    "poster": "Live ratings"
+  },
+  "contact": {
+    "index": "04",
+    "kicker": "Contact",
+    "mail": "Email",
+    "prompt": "Contact",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "telegram": "Telegram",
+    "discord": "Discord",
+    "youtube": "YouTube"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "back": "Back to top"
+  }
+}

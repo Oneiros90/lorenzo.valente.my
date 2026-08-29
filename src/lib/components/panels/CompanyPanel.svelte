@@ -39,7 +39,7 @@
       <div class="project-list">
         {#each company.projects as project (project.id)}
           <WorkProjectCard
-            name={project.name}
+            name={loc(project.name, locale)}
             url={project.url}
             description={loc(project.description, locale)}
             imageUrl={project.imageUrl}

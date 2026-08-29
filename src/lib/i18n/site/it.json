@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "title": "Lorenzo Valente",
+    "description": "Ingegnere del software. Videogiochi, XR, grafica in tempo reale, web full-stack."
+  },
+  "nav": {
+    "index": "Indice",
+    "bio": "Biografia",
+    "work": "Lavoro",
+    "projects": "Progetti",
+    "chess": "Scacchi",
+    "contact": "Contatti",
+    "enceladus": "Enceladus",
+    "themeLight": "Chiaro",
+    "themeDark": "Scuro",
+    "langEn": "EN",
+    "langIt": "IT",
+    "menu": "Menu",
+    "close": "Chiudi",
+    "skip": "Vai al contenuto",
+    "progress": "Avanzamento lettura"
+  },
+  "bio": {
+    "index": "00",
+    "kicker": "Biografia",
+    "role": "Ruolo",
+    "cv": "Scarica CV",
+    "born": "Data di nascita",
+    "place": "Luogo",
+    "workplace": "Sede di lavoro"
+  },
+  "work": {
+    "index": "01",
+    "kicker": "Lavoro",
+    "role": "Ruolo",
+    "period": "Periodo",
+    "duration": "Durata",
+    "year": "anno",
+    "years": "anni",
+    "projects": "Lavori selezionati",
+    "chronology": "Percorso"
+  },
+  "projects": {
+    "index": "02",
+    "kicker": "Progetti",
+    "stars": "Stelle",
+    "language": "Linguaggio",
+    "followers": "Follower",
+    "joined": "Iscritto",
+    "repos": "Repository",
+    "empty": "Nessun repository pubblico.",
+    "error": "GitHub non è al momento disponibile.",
+    "noDescription": "Nessuna descrizione disponibile.",
+    "sequence": "Repository selezionati",
+    "open": "Apri repository"
+  },
+  "chess": {
+    "index": "03",
+    "kicker": "Chess.com",
+    "rapid": "Rapid",
+    "blitz": "Blitz",
+    "bullet": "Bullet",
+    "best": "Picco",
+    "games": "Partite",
+    "winRate": "Vittorie",
+    "followers": "Follower",
+    "league": "Lega",
+    "location": "Luogo",
+    "joined": "Iscritto",
+    "premium": "Premium",
+    "lastGame": "Ultima partita",
+    "empty": "Nessuna partita recente.",
+    "error": "Chess.com non è al momento disponibile.",
+    "win": "Vittoria",
+    "loss": "Sconfitta",
+    "draw": "Patta",
+    "profile": "Apri il profilo Chess.com",
+    "poster": "Punteggi dal vivo"
+  },
+  "contact": {
+    "index": "04",
+    "kicker": "Contatti",
+    "mail": "Email",
+    "prompt": "Contatti",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "telegram": "Telegram",
+    "discord": "Discord",
+    "youtube": "YouTube"
+  },
+  "footer": {
+    "rights": "Tutti i diritti riservati.",
+    "back": "Torna all'inizio"
+  }
+}

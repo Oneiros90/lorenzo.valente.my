@@ -1,0 +1,14 @@
+---
+description: Visual and copy constraints for the Valente site (Ryoku tokens, no sci-fi on homepage)
+alwaysApply: true
+---
+
+# Design lock
+
+- Homepage copy is editorial and factual. Never use Enceladus sci-fi tone (atmosphere, habitat, uplink, O2, colonial archive) on `/`.
+- Enceladus (`/enceladus/`) keeps its existing HUD copy.
+- Colors, radius, and type come from CSS variables in `src/site/styles/tokens.css`. No raw hex in Svelte markup. No `box-shadow`. No Inter.
+- `border-radius: var(--radius)` (2px). Grain overlay stays at 5.5%.
+- Do not duplicate profile, company, project, chess, github, or social data. Read `src/lib/config/` and shared fetchers.
+- Homepage must not wait for images or live APIs before first paint.
+- No Japanese glyphs on the homepage.

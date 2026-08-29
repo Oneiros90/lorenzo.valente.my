@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": false,
+  "tailwind": {
+    "config": "",
+    "css": "src/site/styles/site.css",
+    "baseColor": "neutral",
+    "cssVariables": false
+  },
+  "aliases": {
+    "components": "$lib/components",
+    "utils": "$lib/utils",
+    "ui": "$lib/components",
+    "lib": "$lib",
+    "hooks": "$lib"
+  },
+  "registries": {
+    "@canvas-ui": "https://canvasui.dev/r/{name}.json"
+  }
+}

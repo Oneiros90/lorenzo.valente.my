@@ -1,12 +1,23 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ENCELADUS PRIME // 2308</title>
+    <meta name="description" content="Lorenzo Valente — Software Engineer. Games, XR, real-time graphics, full-stack web." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Lorenzo Valente</title>
+    <script>
+      try {
+        var t = localStorage.getItem('valente-theme');
+        document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : 'dark';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/site/main.ts"></script>
   </body>
 </html>

@@ -4,6 +4,18 @@
     "archiveId": "2308-LV",
     "status": "active",
     "name": "Lorenzo Valente",
+    "born": {
+      "en": "1990",
+      "it": "1990"
+    },
+    "place": {
+      "en": "Turin, Italy",
+      "it": "Torino, Italia"
+    },
+    "workplace": {
+      "en": "Remote",
+      "it": "Remoto"
+    },
     "specialization": {
       "en": "Software Engineer",
       "it": "Ingegnere del software"
@@ -17,8 +29,16 @@
     {
       "id": "arkadium",
       "years": 1,
-      "colorA": [0.9, 0.12, 0.12],
-      "colorB": [0.96, 0.95, 0.94],
+      "colorA": [
+        0.9,
+        0.12,
+        0.12
+      ],
+      "colorB": [
+        0.96,
+        0.95,
+        0.94
+      ],
       "name": "Arkadium",
       "role": {
         "en": "Senior Game Developer",
@@ -35,7 +55,10 @@
       "projects": [
         {
           "id": "microsoft-solitaire-collection",
-          "name": "Microsoft Solitaire Collection",
+          "name": {
+            "en": "Microsoft Solitaire Collection",
+            "it": "Microsoft Solitaire Collection"
+          },
           "url": "https://apps.microsoft.com/detail/9wzdncrfhwd2?hl=it-IT&gl=IT",
           "imageUrl": "https://store-images.s-microsoft.com/image/apps.28398.9007199266246761.b535414e-52ea-483a-af68-de38ef6ba67a.c9e48a38-2b9f-4a26-9e8a-860467751481",
           "description": {
@@ -48,8 +71,16 @@
     {
       "id": "tiny-bull-studios",
       "years": 5,
-      "colorA": [0.85, 0.08, 0.08],
-      "colorB": [0.04, 0.03, 0.03],
+      "colorA": [
+        0.85,
+        0.08,
+        0.08
+      ],
+      "colorB": [
+        0.04,
+        0.03,
+        0.03
+      ],
       "name": "Tiny Bull Studios",
       "role": {
         "en": "Senior Game Developer",
@@ -66,7 +97,10 @@
       "projects": [
         {
           "id": "the-lonesome-guild",
-          "name": "The Lonesome Guild",
+          "name": {
+            "en": "The Lonesome Guild",
+            "it": "The Lonesome Guild"
+          },
           "url": "https://tinybullstudios.com/games/the-lonesome-guild/",
           "imageUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1486450/header.jpg",
           "description": {
@@ -76,7 +110,10 @@
         },
         {
           "id": "omen-exitio-hunger",
-          "name": "Omen Exitio: Hunger",
+          "name": {
+            "en": "Omen Exitio: Hunger",
+            "it": "Omen Exitio: Hunger"
+          },
           "url": "https://tinybullstudios.com/games/omen-exitio-hunger-game-book/",
           "imageUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1466520/header.jpg",
           "description": {
@@ -86,7 +123,10 @@
         },
         {
           "id": "foodland",
-          "name": "Foodland",
+          "name": {
+            "en": "Foodland",
+            "it": "Foodland"
+          },
           "url": "https://gamethinkers.it/portfolio/foodland-un-nuovo-format-educativo/",
           "imageUrl": "https://gamethinkers.it/wp-content/uploads/Map_Characters.jpg",
           "description": {
@@ -96,7 +136,10 @@
         },
         {
           "id": "ross-sgrammanebbia",
-          "name": "Ross e la Sgrammanebbia",
+          "name": {
+            "en": "Ross and the Sgrammanebbia",
+            "it": "Ross e la Sgrammanebbia"
+          },
           "url": "https://gamethinkers.it/portfolio/ross-e-la-sgrammanebbia-videogioco-educativo/",
           "imageUrl": "https://gamethinkers.it/wp-content/uploads/GameThinkers-portfolio-Ross-e-la-Sgrammanebbia.jpg",
           "description": {
@@ -106,7 +149,10 @@
         },
         {
           "id": "ereal-museo-zoologia",
-          "name": "e-Real Museo di Zoologia di Roma",
+          "name": {
+            "en": "e-Real Zoology Museum of Rome",
+            "it": "e-Real Museo di Zoologia di Roma"
+          },
           "url": "https://gamethinkers.it/portfolio/realta-estesa-museo-di-zoologia-di-roma/",
           "imageUrl": "https://gamethinkers.it/wp-content/uploads/GameThinkers-portfolio-e-Real-Museo-di-Zoologia-di-Roma-sala-arrigoni.jpg",
           "description": {
@@ -119,8 +165,16 @@
     {
       "id": "anothereality",
       "years": 2,
-      "colorA": [0.48, 0.18, 0.92],
-      "colorB": [0.12, 0.28, 0.9],
+      "colorA": [
+        0.48,
+        0.18,
+        0.92
+      ],
+      "colorB": [
+        0.12,
+        0.28,
+        0.9
+      ],
       "name": "AnotheReality",
       "role": {
         "en": "XR Software Developer",
@@ -137,7 +191,10 @@
       "projects": [
         {
           "id": "beautiful-inside",
-          "name": "Beautiful Inside",
+          "name": {
+            "en": "Beautiful Inside",
+            "it": "Beautiful Inside"
+          },
           "url": "https://www.anothereality.io/it/case-studies/beautiful-inside-body-tracking-experience/",
           "imageUrl": "https://www.anothereality.io/wp-content/uploads/2023/06/Beautiful-inside.jpg",
           "description": {
@@ -147,7 +204,10 @@
         },
         {
           "id": "the-sea-rider",
-          "name": "The Sea Rider",
+          "name": {
+            "en": "The Sea Rider",
+            "it": "The Sea Rider"
+          },
           "url": "https://www.anothereality.io/it/case-studies/the-sea-rider-msc-advergame/",
           "imageUrl": "https://www.anothereality.io/wp-content/uploads/2023/06/The_Sea_Rider_banner.jpg",
           "description": {
@@ -157,7 +217,10 @@
         },
         {
           "id": "terna-quota",
-          "name": "Simulatore VR operazioni in quota",
+          "name": {
+            "en": "High-altitude operations VR simulator",
+            "it": "Simulatore VR operazioni in quota"
+          },
           "url": "https://www.anothereality.io/it/case-studies/simulazione-operazioni-quota/",
           "imageUrl": "https://www.anothereality.io/wp-content/uploads/2023/05/exp2_10-1024x544.png",
           "description": {
@@ -167,7 +230,10 @@
         },
         {
           "id": "mr-fini",
-          "name": "MR. FINI, The Experience",
+          "name": {
+            "en": "MR. FINI, The Experience",
+            "it": "MR. FINI, The Experience"
+          },
           "url": "https://www.anothereality.io/it/case-studies/mr-fini-the-experience/",
           "imageUrl": "https://www.anothereality.io/wp-content/uploads/2022/12/mrfini.jpg",
           "description": {
@@ -180,8 +246,16 @@
     {
       "id": "illogic",
       "years": 3,
-      "colorA": [0.88, 0.16, 0.1],
-      "colorB": [0.42, 0.22, 0.08],
+      "colorA": [
+        0.88,
+        0.16,
+        0.1
+      ],
+      "colorB": [
+        0.42,
+        0.22,
+        0.08
+      ],
       "name": "Illogic",
       "role": {
         "en": "VR and AR Analyst Programmer",
@@ -198,7 +272,10 @@
       "projects": [
         {
           "id": "xr-star",
-          "name": "XR-STAR",
+          "name": {
+            "en": "XR-STAR",
+            "it": "XR-STAR"
+          },
           "url": "https://illogic.xyz/case/xr-star-virtual-reality-platform/",
           "imageUrl": "https://illogic.xyz/wp-content/uploads/2019/01/vr-star-01.jpg",
           "description": {
@@ -208,7 +285,10 @@
         },
         {
           "id": "a4blue",
-          "name": "A4BLUE",
+          "name": {
+            "en": "A4BLUE",
+            "it": "A4BLUE"
+          },
           "url": "https://illogic.xyz/case/a4blue/",
           "imageUrl": "https://illogic.xyz/wp-content/uploads/2019/02/a4blue.jpg",
           "description": {
@@ -218,7 +298,10 @@
         },
         {
           "id": "mogar",
-          "name": "MOGAR",
+          "name": {
+            "en": "MOGAR",
+            "it": "MOGAR"
+          },
           "url": "https://illogic.xyz/case/morgar-vr/",
           "imageUrl": "https://illogic.xyz/wp-content/uploads/2019/02/morgar-03.jpg",
           "description": {
@@ -231,8 +314,16 @@
     {
       "id": "unimol",
       "years": 3,
-      "colorA": [0.18, 0.72, 0.22],
-      "colorB": [0.95, 0.82, 0.08],
+      "colorA": [
+        0.18,
+        0.72,
+        0.22
+      ],
+      "colorB": [
+        0.95,
+        0.82,
+        0.08
+      ],
       "name": "UNIMOL",
       "role": {
         "en": "Full-stack Web Designer",
@@ -249,7 +340,10 @@
       "projects": [
         {
           "id": "lifemipp",
-          "name": "LifeMIPP / InNat",
+          "name": {
+            "en": "LifeMIPP / InNat",
+            "it": "LifeMIPP / InNat"
+          },
           "url": "https://lifemipp.eu/",
           "imageUrl": "https://www.innat.unimol.it/wp-content/uploads/2021/02/Logo-300x70.png",
           "description": {

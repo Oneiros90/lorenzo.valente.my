@@ -7,7 +7,7 @@ export interface LocalizedText {
 
 export interface WorkProject {
   id: string;
-  name: string;
+  name: LocalizedText;
   url: string;
   imageUrl: string | null;
   description: LocalizedText;
@@ -54,6 +54,9 @@ export interface BioConfig {
   name: string;
   specialization: LocalizedText;
   description: LocalizedText;
+  born: LocalizedText;
+  place: LocalizedText;
+  workplace: LocalizedText;
 }
 
 export interface ProfileConfig {
