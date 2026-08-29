@@ -10,6 +10,6 @@
 </script>
 
 <div class="boot" class:done>
-  <div>{strings.boot.message}</div>
+  <div class="boot__msg">{strings.boot.message}</div>
   <div class="boot__bar"><i></i></div>
 </div>
