@@ -106,6 +106,10 @@
 		padding: var(--space-3);
 	}
 
+	.hero-frame :global(.section-head) {
+		margin-bottom: var(--space-4);
+	}
+
 	.opening {
 		position: relative;
 		align-items: start;
@@ -134,7 +138,7 @@
 		grid-row: 1;
 		align-self: start;
 		min-width: 0;
-		padding-top: clamp(var(--space-3), 6vh, var(--space-6));
+		padding-top: clamp(var(--space-2), 3.5vh, var(--space-4));
 	}
 
 	.nameplate :global(.hero-decrypt),
@@ -230,6 +234,10 @@
 			overflow: visible;
 		}
 
+		.hero-frame :global(.section-head) {
+			margin-bottom: var(--space-5);
+		}
+
 		.opening {
 			align-items: end;
 			align-content: stretch;
@@ -244,6 +252,7 @@
 			grid-column: 1 / 10;
 			grid-row: 1 / 3;
 			align-self: center;
+			padding-top: clamp(var(--space-3), 6vh, var(--space-6));
 			transform: translate3d(0, var(--scene-y), 0);
 			will-change: transform;
 		}
