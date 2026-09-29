@@ -8,6 +8,7 @@
   --ink-4: #857c73;
   --line: color-mix(in srgb, var(--ink-1) 18%, transparent);
   --radius: 2px;
+  --grain: url('../assets/grain.png');
   --grain-opacity: 0.055;
   --font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
   --font-serif: 'Fraunces', 'Times New Roman', serif;
